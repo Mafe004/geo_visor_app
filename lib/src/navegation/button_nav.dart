@@ -11,14 +11,23 @@ class _BnavigatorState extends State<Bnavigator> {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Noticias',
+          label: 'Noti',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.accessibility),
           label: 'Mapa',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.add),
+          label: 'Repo',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.add_alert),
+          label: 'Noti',
         ),
       ],
     );
