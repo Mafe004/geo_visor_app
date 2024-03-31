@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Bnavigator extends StatefulWidget {
-  const Bnavigator({Key? key}) : super(key: key);
+  final Function currentIndex;
+  const Bnavigator({super.key, required this.currentIndex});
 
   @override
   _BnavigatorState createState() => _BnavigatorState();
@@ -15,10 +16,13 @@ class _BnavigatorState extends State<Bnavigator> {
       currentIndex: index,
       onTap: (int i){
         setState(() {
-
+          index = i;
+          widget.currentIndex(i);
         });
-        index = i;
+
+
       },
+
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Colors.indigoAccent,
       items: const [
@@ -33,6 +37,7 @@ class _BnavigatorState extends State<Bnavigator> {
         BottomNavigationBarItem(
           icon: Icon(Icons.add),
           label: 'Repo',
+
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.add_alert),
@@ -40,5 +45,5 @@ class _BnavigatorState extends State<Bnavigator> {
         ),
       ],
     );
-  }
+}
 }

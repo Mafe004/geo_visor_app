@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/form.dart';
+import 'package:geo_visor_app/src/navegation/form.dart';
 import 'package:geo_visor_app/src/navegation/button_nav.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -38,17 +38,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
         backgroundColor: Colors.blueAccent,
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => FormExampleApp()),
+            MaterialPageRoute(builder: (context) => const FormExampleApp()),
           );
         },
+        child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      bottomNavigationBar: Bnavigator(), // Agrega tu widget de navegación aquí
+
     );
   }
 }
