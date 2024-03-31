@@ -22,8 +22,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Geo Visor A&S'),
+        title: const Text('Geo Visor A&S',
+          style: TextStyle(color: Colors.white,
+        ),
+        ),
+
         backgroundColor: Colors.indigoAccent,
+        centerTitle: true,
       ),
       body: GoogleMap(
         onMapCreated: _onMapCreated,
@@ -34,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
+        backgroundColor: Colors.blueAccent,
         onPressed: () {
           Navigator.push(
             context,
@@ -41,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
