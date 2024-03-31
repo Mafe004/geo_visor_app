@@ -1,28 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/src/features/menu_geovisor/screens/index_geovisor/index_screen.dart';
-import 'package:geo_visor_app/src/routing/routes.dart';
-import 'package:geo_visor_app/src/utils/theme/theme.dart';
-import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() => runApp(const MyApp());
+
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _MyAppState extends State<MyApp> {
+  late GoogleMapController mapController;
 
-  // This widget is the root of your application.
+  final LatLng _center = const LatLng(45.521563, -122.677433);
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Flutter Demo',
-      themeMode: ThemeMode.system,
-      theme: GeoVisorTheme.lightTheme,
-      darkTheme: GeoVisorTheme.darkTheme,
-      defaultTransition: Transition.leftToRightWithFade,
-      transitionDuration: const Duration(milliseconds: 500),
-      getPages: routes,
-      home: const IndexScreen(),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Maps Sample App'),
+          backgroundColor: Colors.green[700],
+        ),
+        body: GoogleMap(
+          onMapCreated: _onMapCreated,
+          initialCameraPosition: CameraPosition(
+            target: _center,
+            zoom: 11.0,
+          ),
+        ),
+      ),
     );
   }
 }
