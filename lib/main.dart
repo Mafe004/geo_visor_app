@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/src/navegation/home_screen.dart';
 import 'package:geo_visor_app/src/navegation/button_nav.dart';
-import 'package:geo_visor_app/src/navegation/information.dart';
-import 'package:geo_visor_app/src/navegation/notipage.dart';
 import 'package:geo_visor_app/src/routing/routes.dart';
 
 
