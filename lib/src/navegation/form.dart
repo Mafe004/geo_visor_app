@@ -87,7 +87,7 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
                         !value.toLowerCase().contains('cundinamarca')) {
                       return 'La ubicación debe estar dentro de Cundinamarca';
                     }
-                    return null;
+                    return Stepper().;
                   },
                   onChanged: (value) => _formData.ubicacion = value,
                 ),
@@ -238,4 +238,4 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
     print('Estado de las carreteras: ${_formData.estadoCarreteras}');
     print('Servicios básicos: ${_formData.serviciosBasicos}');
   }
-}
+  }
