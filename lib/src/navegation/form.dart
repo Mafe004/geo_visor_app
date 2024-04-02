@@ -19,6 +19,24 @@ class FormExampleApp extends StatelessWidget {
   }
 }
 
+class FormData {
+  String ubicacion = '';
+  String tipoLugar = '';
+  String estadoCarreteras = '';
+  String serviciosBasicos = '';
+  String estadoEdificaciones = '';
+  String calidadAgua = '';
+  String fuentesAgua = '';
+  String problemasAgua = '';
+  String tipoSuministroAgua = '';
+  String estadoTratamientoAgua = '';
+  String cortesAgua = '';
+  String tipoAlcantarillado = '';
+  String estadoTratamientoAlcantarillado = '';
+  String problemasEspecificos = '';
+  String comentariosAdicionales = '';
+}
+
 class FormularioInformacion extends StatefulWidget {
   @override
   _FormularioInformacionState createState() => _FormularioInformacionState();
@@ -26,22 +44,7 @@ class FormularioInformacion extends StatefulWidget {
 
 class _FormularioInformacionState extends State<FormularioInformacion> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  TextEditingController _ubicacionController = TextEditingController();
-  TextEditingController _tipoLugarController = TextEditingController();
-  TextEditingController _estadoCarreterasController = TextEditingController();
-  TextEditingController _serviciosBasicosController = TextEditingController();
-  TextEditingController _estadoEdificacionesController = TextEditingController();
-  TextEditingController _calidadAguaController = TextEditingController();
-  TextEditingController _fuentesAguaController = TextEditingController();
-  TextEditingController _problemasAguaController = TextEditingController();
-  TextEditingController _tipoSuministroAguaController = TextEditingController();
-  TextEditingController _estadoTratamientoAguaController = TextEditingController();
-  TextEditingController _cortesAguaController = TextEditingController();
-  TextEditingController _tipoAlcantarilladoController = TextEditingController();
-  TextEditingController _estadoTratamientoAlcantarilladoController = TextEditingController();
-  TextEditingController _problemasEspecificosController = TextEditingController();
-  TextEditingController _comentariosAdicionalesController = TextEditingController();
+  final FormData _formData = FormData();
 
   int _currentStep = 0;
 
@@ -56,13 +59,10 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
         onStepContinue: () {
           if (_formKey.currentState != null &&
               _formKey.currentState!.validate()) {
-            if (_currentStep < 7) {
-              setState(() {
-                _currentStep += 1;
-              });
-            } else {
-              //_submitForm();
-            }
+            setState(() {
+              _currentStep += 1;
+            });
+            _saveFormData(); // Guardar datos al avanzar
           }
         },
         onStepCancel: () {
@@ -78,7 +78,6 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
             content: Column(
               children: <Widget>[
                 TextFormField(
-                  controller: _ubicacionController,
                   decoration: InputDecoration(
                       labelText: 'Ubicación (solo en Cundinamarca)'),
                   validator: (value) {
@@ -90,9 +89,9 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
                     }
                     return null;
                   },
+                  onChanged: (value) => _formData.ubicacion = value,
                 ),
                 TextFormField(
-                  controller: _tipoLugarController,
                   decoration: InputDecoration(labelText: 'Tipo de lugar'),
                   validator: (value) {
                     if (value != null && value.isEmpty) {
@@ -100,6 +99,7 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
                     }
                     return null;
                   },
+                  onChanged: (value) => _formData.tipoLugar = value,
                 ),
               ],
             ),
@@ -109,19 +109,22 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
             content: Column(
               children: <Widget>[
                 TextFormField(
-                  controller: _estadoCarreterasController,
                   decoration: InputDecoration(
                       labelText: 'Estado de las carreteras o calles de acceso'),
+                  onChanged: (value) =>
+                  _formData.estadoCarreteras = value,
                 ),
                 TextFormField(
-                  controller: _serviciosBasicosController,
                   decoration: InputDecoration(
                       labelText: 'Disponibilidad de servicios básicos'),
+                  onChanged: (value) =>
+                  _formData.serviciosBasicos = value,
                 ),
                 TextFormField(
-                  controller: _estadoEdificacionesController,
                   decoration: InputDecoration(
                       labelText: 'Estado de edificaciones cercanas'),
+                  onChanged: (value) =>
+                  _formData.estadoEdificaciones = value,
                 ),
               ],
             ),
@@ -131,18 +134,18 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
             content: Column(
               children: <Widget>[
                 TextFormField(
-                  controller: _calidadAguaController,
                   decoration: InputDecoration(labelText: 'Calidad del agua'),
+                  onChanged: (value) => _formData.calidadAgua = value,
                 ),
                 TextFormField(
-                  controller: _fuentesAguaController,
                   decoration: InputDecoration(
                       labelText: 'Fuentes de agua cercanas'),
+                  onChanged: (value) => _formData.fuentesAgua = value,
                 ),
                 TextFormField(
-                  controller: _problemasAguaController,
                   decoration: InputDecoration(
                       labelText: 'Problemas específicos relacionados con el agua'),
+                  onChanged: (value) => _formData.problemasAgua = value,
                 ),
               ],
             ),
@@ -152,19 +155,22 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
             content: Column(
               children: <Widget>[
                 TextFormField(
-                  controller: _tipoSuministroAguaController,
                   decoration: InputDecoration(
                       labelText: 'Tipo de suministro de agua'),
+                  onChanged: (value) =>
+                  _formData.tipoSuministroAgua = value,
                 ),
                 TextFormField(
-                  controller: _estadoTratamientoAguaController,
                   decoration: InputDecoration(
-                      labelText: 'Estado de las instalaciones de tratamiento de agua'),
+                      labelText:
+                      'Estado de las instalaciones de tratamiento de agua'),
+                  onChanged: (value) =>
+                  _formData.estadoTratamientoAgua = value,
                 ),
                 TextFormField(
-                  controller: _cortesAguaController,
                   decoration: InputDecoration(
                       labelText: 'Frecuencia y duración de cortes de agua'),
+                  onChanged: (value) => _formData.cortesAgua = value,
                 ),
               ],
             ),
@@ -174,14 +180,17 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
             content: Column(
               children: <Widget>[
                 TextFormField(
-                  controller: _tipoAlcantarilladoController,
                   decoration: InputDecoration(
                       labelText: 'Tipo de sistema de alcantarillado'),
+                  onChanged: (value) =>
+                  _formData.tipoAlcantarillado = value,
                 ),
                 TextFormField(
-                  controller: _estadoTratamientoAlcantarilladoController,
                   decoration: InputDecoration(
-                      labelText: 'Estado de las instalaciones de tratamiento de aguas residuales'),
+                      labelText:
+                      'Estado de las instalaciones de tratamiento de aguas residuales'),
+                  onChanged: (value) =>
+                  _formData.estadoTratamientoAlcantarillado = value,
                 ),
               ],
             ),
@@ -191,9 +200,10 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
             content: Column(
               children: <Widget>[
                 TextFormField(
-                  controller: _problemasEspecificosController,
                   decoration: InputDecoration(
                       labelText: 'Descripción detallada de cualquier problema específico'),
+                  onChanged: (value) =>
+                  _formData.problemasEspecificos = value,
                 ),
                 TextFormField(
                   decoration: InputDecoration(
@@ -207,9 +217,10 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
             content: Column(
               children: <Widget>[
                 TextFormField(
-                  controller: _comentariosAdicionalesController,
                   decoration: InputDecoration(
                       labelText: 'Comentarios adicionales'),
+                  onChanged: (value) =>
+                  _formData.comentariosAdicionales = value,
                 ),
               ],
             ),
@@ -218,4 +229,11 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
       ),
     );
   }
-}
+
+  void _saveFormData() {
+    // Aquí puedes guardar los datos de _formData donde desees, por ejemplo:
+    print('Datos guardados:');
+    print('Ubicación: ${_formData.ubicacion}');
+    print('Tipo de lugar: ${_formData.tipoLugar}');
+    print('Estado de las carreteras: ${_formData.estadoCarreteras}');
+    print('Servicios básicos: ${_formData.serviciosBasicos}');
