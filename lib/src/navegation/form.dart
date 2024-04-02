@@ -1,241 +1,184 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(FormExampleApp());
-}
 
 class FormExampleApp extends StatelessWidget {
-  const FormExampleApp({Key? key}) : super(key: key);
+  const FormExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Formulario de Información',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: FormularioInformacion(),
-    );
-  }
+  State<FormExampleApp> createState() => _FormExampleApp();
 }
 
-class FormData {
-  String ubicacion = '';
-  String tipoLugar = '';
-  String estadoCarreteras = '';
-  String serviciosBasicos = '';
-  String estadoEdificaciones = '';
-  String calidadAgua = '';
-  String fuentesAgua = '';
-  String problemasAgua = '';
-  String tipoSuministroAgua = '';
-  String estadoTratamientoAgua = '';
-  String cortesAgua = '';
-  String tipoAlcantarillado = '';
-  String estadoTratamientoAlcantarillado = '';
-  String problemasEspecificos = '';
-  String comentariosAdicionales = '';
-}
+class _FormExampleApp extends State<FormExmapleApp>{
+  int currentStep =0;
+  bool get isFirstStep => currentStep ==0;
+  bool get isLastStep => currentStep ==steps()-length -1;
 
-class FormularioInformacion extends StatefulWidget {
-  @override
-  _FormularioInformacionState createState() => _FormularioInformacionState();
-}
+  final Ubicacion = TextEditingController();
+  final Tipo_Lugar = TextEditingController();
+  final name = TextEditingController();
+  final name = TextEditingController();
 
-class _FormularioInformacionState extends State<FormularioInformacion> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final FormData _formData = FormData();
-
-  int _currentStep = 0;
+  bool isComplete = false;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Formulario de Información'),
-      ),
-      body: Stepper(
-        currentStep: _currentStep,
-        onStepContinue: () {
-          if (_formKey.currentState != null &&
-              _formKey.currentState!.validate()) {
-            setState(() {
-              _currentStep += 1;
-            });
-            _saveFormData(); // Guardar datos al avanzar
-          }
-        },
-        onStepCancel: () {
-          if (_currentStep > 0) {
-            setState(() {
-              _currentStep -= 1;
-            });
-          }
-        },
-        steps: [
-          Step(
-            title: Text('Información general del lugar'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Ubicación (solo en Cundinamarca)'),
-                  validator: (value) {
-                    if (value != null && value.isEmpty) {
-                      return 'Por favor ingresa la ubicación';
-                    } else if (value != null &&
-                        !value.toLowerCase().contains('cundinamarca')) {
-                      return 'La ubicación debe estar dentro de Cundinamarca';
-                    }
-                    return Stepper().;
-                  },
-                  onChanged: (value) => _formData.ubicacion = value,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Tipo de lugar'),
-                  validator: (value) {
-                    if (value != null && value.isEmpty) {
-                      return 'Por favor ingresa el tipo de lugar';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) => _formData.tipoLugar = value,
-                ),
-              ],
-            ),
-          ),
-          Step(
-            title: Text('Infraestructura'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Estado de las carreteras o calles de acceso'),
-                  onChanged: (value) =>
-                  _formData.estadoCarreteras = value,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Disponibilidad de servicios básicos'),
-                  onChanged: (value) =>
-                  _formData.serviciosBasicos = value,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Estado de edificaciones cercanas'),
-                  onChanged: (value) =>
-                  _formData.estadoEdificaciones = value,
-                ),
-              ],
-            ),
-          ),
-          Step(
-            title: Text('Agua'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Calidad del agua'),
-                  onChanged: (value) => _formData.calidadAgua = value,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Fuentes de agua cercanas'),
-                  onChanged: (value) => _formData.fuentesAgua = value,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Problemas específicos relacionados con el agua'),
-                  onChanged: (value) => _formData.problemasAgua = value,
-                ),
-              ],
-            ),
-          ),
-          Step(
-            title: Text('Sistemas de Agua'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Tipo de suministro de agua'),
-                  onChanged: (value) =>
-                  _formData.tipoSuministroAgua = value,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText:
-                      'Estado de las instalaciones de tratamiento de agua'),
-                  onChanged: (value) =>
-                  _formData.estadoTratamientoAgua = value,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Frecuencia y duración de cortes de agua'),
-                  onChanged: (value) => _formData.cortesAgua = value,
-                ),
-              ],
-            ),
-          ),
-          Step(
-            title: Text('Infraestructura de alcantarillado'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Tipo de sistema de alcantarillado'),
-                  onChanged: (value) =>
-                  _formData.tipoAlcantarillado = value,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText:
-                      'Estado de las instalaciones de tratamiento de aguas residuales'),
-                  onChanged: (value) =>
-                  _formData.estadoTratamientoAlcantarillado = value,
-                ),
-              ],
-            ),
-          ),
-          Step(
-            title: Text('Problemas específicos'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Descripción detallada de cualquier problema específico'),
-                  onChanged: (value) =>
-                  _formData.problemasEspecificos = value,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Fotos o archivos adjuntos'),
-                ),
-              ],
-            ),
-          ),
-          Step(
-            title: Text('Comentarios adicionales'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Comentarios adicionales'),
-                  onChanged: (value) =>
-                  _formData.comentariosAdicionales = value,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  widget build(BuildContext context) => Scaffold(
+         appBar: Appbar(title: const Text('Flutter Stepper widget')),
+         body: isComplete
+         ? buildSuccessPage()
+         : Stepper (
+           type: stepperType.horizontal
+         steps: steps(),
+         currentStep: currentStep,
+         onStepContinue: () {
+           if (islastStep){
+             setState(() => isComplete = true);
+           }else {
+             setState(() => currentStep +=1);
+           }
+         },
+         onStepCancel:
+             isFirstStep ? null : () => setState(()=> currentStep -= 1 )
+         onStepTapped: step => setState(()=> currentStep =step),
+         controlsBuilder:(context, details) => Padding(
+           padding: const EdgeInsert.only(top: 32),
+           child: row (
+             children:[
+               Expanded(
+                 child: ElevatedButton(
+                   onPressed: details.onStepContinue,
+                   child: Text isLastStep ? 'Confirm' :'Next'),
+                 ),//ElevatedButton
+               ), // Expanded
+               if (!isFirstStep)...[
+               const SizedBox(width: 16),
+               Expanded(
+                 child: ElevatedButton(
+                   onPressed: isFirstStep ? null : details.onSteCancel,
+                   child: const Text ('Back'),
+                 ),//ElevatedButton
+               ),// Expanded
+             ],
+           ),// Row
+         ),//Padding
+        ), //Stepper
+       );//Scaffold
 
-  void _saveFormData() {
-    // Aquí puedes guardar los datos de _formData donde desees, por ejemplo:
-    print('Datos guardados:');
-    print('Ubicación: ${_formData.ubicacion}');
-    print('Tipo de lugar: ${_formData.tipoLugar}');
-    print('Estado de las carreteras: ${_formData.estadoCarreteras}');
-    print('Servicios básicos: ${_formData.serviciosBasicos}');
-  }
-  }
+  List<Step> steps() =>[
+         Step(
+           state: currentStep > 0 ? StepState.complete : StepState.indexed,
+           isActive: currentStep >=0,
+          title: const Text('Información General del lugar'),
+          Content: Column(
+            children:[
+              TextFormField(
+                controller: name,
+                decoration: const InputDecoration(labelText: 'Ubicación'),
+              ),
+              TextFormField(
+                controller: name,
+                decoration: const InputDecoration(labelText: 'Tipo de lugar'),
+              ), // TextFormField
+            ],
+          ),//column
+         ), // step
+         Step(
+           state: currentStep > 1 ? StepState.complete : StepState.indexed,
+           isActive: currentStep >=1,
+           title: const Text('Infraestructura'),
+           Content: Column(
+           children:[
+             TextFormField(
+               controller: name,
+               decoration: const InputDecoration(labelText: 'Dirección'),
+             ),
+             TextFormField(
+               controller: name,
+               decoration: const InputDecoration(labelText: 'Dirección'),
+             ), // TextFormField
+           ],
+         ),//column
+         ), // step
+
+         'your details have been confirmed successfully',
+         textAling: TextAling.center,
+         style: TextStyle(fontSize: 18),
+        ),// text
+        const SizedBox(height: 20),
+        const Spacer(),
+        Align(
+           alignment:  Aliment.centerRight,
+           child: ElevatedButton(
+             onPressed:(){
+               setState((){
+                 isComplete = false;
+                 currentStop =0;
+
+                 name.clear();
+                 age.clear();
+                 company.clar();
+                 role.cler();
+  });
+ },
+  child: const Text('RESET'),
+  ),// ElevatedButton
+  ),//Align
+],
+  ), //Column
+  ),//Padding
+  );//Center
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+           isActive: currentStep >=1,
+          title: const Text('Ubicación'),
+          Content: const Column(),
+        ), // Step
+         Step(
+           isActive: currentStep >=2,
+          title: const Text('Ubicación'),
+          Content: const Column(),
+        ), // Step
+         Step(
+           isActive: currentStep >=3,
+          title: const Text('Ubicación'),
+          Content: const Column(),
+        ), // Step
+         Step(
+           isActive: currentStep >=4,
+          title: const Text('Ubicación'),
+          Content: const Column(),
+        ), // Step
+         Step(
+           isActive: currentStep >=5,
+          title: const Text('Ubicación'),
+          Content: const Column(),
+        ), // Step
+         Step(
+           isActive: currentStep >=6,
+          title: const Text('Ubicación'),
+          Content: const Column(),
+        ), // Step
+         Step(
+           isActive: currentStep >=7,
+          title: const Text('Ubicación'),
+          Content: const Column(),
+        ), // Step
+      ];
+     ),// Column
+   ),//Step
+   Step(
+       state
+       )
+}
+}
