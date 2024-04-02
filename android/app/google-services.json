@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "190836327076",
+    "firebase_url": "https://geovisor-88d44-default-rtdb.firebaseio.com",
+    "project_id": "geovisor-88d44",
+    "storage_bucket": "geovisor-88d44.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190836327076:android:1043cdc29a6135404c5c31",
+        "android_client_info": {
+          "package_name": "com.example.geo_visor_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAl1hp1AdOzZzI5HSigrJ3wceoe87_cAcw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
