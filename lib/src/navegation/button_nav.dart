@@ -23,6 +23,8 @@ class _BnavigatorState extends State<Bnavigator> {
 
       },
 
+
+
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Colors.indigoAccent,
       items: const [

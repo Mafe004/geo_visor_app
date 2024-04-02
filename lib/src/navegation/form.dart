@@ -1,221 +1,248 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(FormExampleApp());
-}
-
-class FormExampleApp extends StatelessWidget {
+class FormExampleApp extends StatefulWidget {
   const FormExampleApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Formulario de Información',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: FormularioInformacion(),
-    );
-  }
+  State<FormExampleApp> createState() => _FormExampleAppState();
 }
 
-class FormularioInformacion extends StatefulWidget {
+class _FormExampleAppState extends State<FormExampleApp> {
+  int currentStep = 0;
+  bool get isFirstStep => currentStep == 0;
+  bool get isLastStep => currentStep == steps().length - 1;
+
+  final ubicacion = TextEditingController();
+  final tipoLugar = TextEditingController();
+  final estadoCarretera = TextEditingController();
+  final serviciosBasicos = TextEditingController();
+  final estadoEdificaciones = TextEditingController();
+  final calidadAgua = TextEditingController();
+  final fuentesAgua = TextEditingController();
+  final problemasAgua = TextEditingController();
+  final tipoSuministros = TextEditingController();
+  final estadoInstalaciones = TextEditingController();
+  final cortesAgua = TextEditingController();
+  final tipoAlcantarillado = TextEditingController();
+  final estadoAlcantarillado = TextEditingController();
+  final problemasEspecificos = TextEditingController();
+  final comentarios = TextEditingController();
+
+
+
+
+  bool isComplete = false;
+
   @override
-  _FormularioInformacionState createState() => _FormularioInformacionState();
-}
-
-class _FormularioInformacionState extends State<FormularioInformacion> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  TextEditingController _ubicacionController = TextEditingController();
-  TextEditingController _tipoLugarController = TextEditingController();
-  TextEditingController _estadoCarreterasController = TextEditingController();
-  TextEditingController _serviciosBasicosController = TextEditingController();
-  TextEditingController _estadoEdificacionesController = TextEditingController();
-  TextEditingController _calidadAguaController = TextEditingController();
-  TextEditingController _fuentesAguaController = TextEditingController();
-  TextEditingController _problemasAguaController = TextEditingController();
-  TextEditingController _tipoSuministroAguaController = TextEditingController();
-  TextEditingController _estadoTratamientoAguaController = TextEditingController();
-  TextEditingController _cortesAguaController = TextEditingController();
-  TextEditingController _tipoAlcantarilladoController = TextEditingController();
-  TextEditingController _estadoTratamientoAlcantarilladoController = TextEditingController();
-  TextEditingController _problemasEspecificosController = TextEditingController();
-  TextEditingController _comentariosAdicionalesController = TextEditingController();
-
-  int _currentStep = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Formulario de Información'),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Flutter Stepper widget')),
+    body: isComplete
+        ? buildSuccessPage()
+        : Stepper(
+      type: StepperType.horizontal,
+      steps: steps(),
+      currentStep: currentStep,
+      onStepContinue: () {
+        if (isLastStep) {
+          setState(() => isComplete = true);
+        } else {
+          setState(() => currentStep += 1);
+        }
+      },
+      onStepCancel: isFirstStep ? null : () => setState(() => currentStep -= 1),
+      onStepTapped: (step) => setState(() => currentStep = step),
+      controlsBuilder: (context, details) => Padding(
+        padding: const EdgeInsets.only(top: 32),
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: details.onStepContinue,
+                child: Text(isLastStep ? 'Confirm' : 'Next'),
+              ),
+            ),
+            if (!isFirstStep) ...[
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: isFirstStep ? null : details.onStepCancel,
+                  child: const Text('Back'),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
-      body: Stepper(
-        currentStep: _currentStep,
-        onStepContinue: () {
-          if (_formKey.currentState != null &&
-              _formKey.currentState!.validate()) {
-            if (_currentStep < 7) {
-              setState(() {
-                _currentStep += 1;
-              });
-            } else {
-              //_submitForm();
-            }
-          }
-        },
-        onStepCancel: () {
-          if (_currentStep > 0) {
-            setState(() {
-              _currentStep -= 1;
-            });
-          }
-        },
-        steps: [
-          Step(
-            title: Text('Información general del lugar'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  controller: _ubicacionController,
-                  decoration: InputDecoration(
-                      labelText: 'Ubicación (solo en Cundinamarca)'),
-                  validator: (value) {
-                    if (value != null && value.isEmpty) {
-                      return 'Por favor ingresa la ubicación';
-                    } else if (value != null &&
-                        !value.toLowerCase().contains('cundinamarca')) {
-                      return 'La ubicación debe estar dentro de Cundinamarca';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _tipoLugarController,
-                  decoration: InputDecoration(labelText: 'Tipo de lugar'),
-                  validator: (value) {
-                    if (value != null && value.isEmpty) {
-                      return 'Por favor ingresa el tipo de lugar';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-            ),
+    ),
+  );
+
+  List<Step> steps() => [
+    Step(
+      state: currentStep > 0 ? StepState.complete : StepState.indexed,
+      isActive: currentStep >= 0,
+      title: const Text('Información General del lugar'),
+      content: Column(
+        children: [
+          TextFormField(
+            controller: ubicacion,
+            decoration: const InputDecoration(labelText: 'Ubicación'),
           ),
-          Step(
-            title: Text('Infraestructura'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  controller: _estadoCarreterasController,
-                  decoration: InputDecoration(
-                      labelText: 'Estado de las carreteras o calles de acceso'),
-                ),
-                TextFormField(
-                  controller: _serviciosBasicosController,
-                  decoration: InputDecoration(
-                      labelText: 'Disponibilidad de servicios básicos'),
-                ),
-                TextFormField(
-                  controller: _estadoEdificacionesController,
-                  decoration: InputDecoration(
-                      labelText: 'Estado de edificaciones cercanas'),
-                ),
-              ],
-            ),
+          TextFormField(
+            controller: tipoLugar,
+            decoration: const InputDecoration(labelText: 'Tipo de lugar'),
           ),
-          Step(
-            title: Text('Agua'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  controller: _calidadAguaController,
-                  decoration: InputDecoration(labelText: 'Calidad del agua'),
-                ),
-                TextFormField(
-                  controller: _fuentesAguaController,
-                  decoration: InputDecoration(
-                      labelText: 'Fuentes de agua cercanas'),
-                ),
-                TextFormField(
-                  controller: _problemasAguaController,
-                  decoration: InputDecoration(
-                      labelText: 'Problemas específicos relacionados con el agua'),
-                ),
-              ],
-            ),
+        ],
+      ),
+    ),
+    Step(
+      state: currentStep > 1 ? StepState.complete : StepState.indexed,
+      isActive: currentStep >= 1,
+      title: const Text('Infraestructura'),
+      content: Column(
+        children: [
+          TextFormField(
+            controller: estadoCarretera,
+            decoration: const InputDecoration(labelText: 'Estado de las carreteras o cales de acceso'),
           ),
-          Step(
-            title: Text('Sistemas de Agua'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  controller: _tipoSuministroAguaController,
-                  decoration: InputDecoration(
-                      labelText: 'Tipo de suministro de agua'),
-                ),
-                TextFormField(
-                  controller: _estadoTratamientoAguaController,
-                  decoration: InputDecoration(
-                      labelText: 'Estado de las instalaciones de tratamiento de agua'),
-                ),
-                TextFormField(
-                  controller: _cortesAguaController,
-                  decoration: InputDecoration(
-                      labelText: 'Frecuencia y duración de cortes de agua'),
-                ),
-              ],
-            ),
+          TextFormField(
+            controller: serviciosBasicos,
+            decoration: const InputDecoration(labelText: 'Disponibilidad de servicios básicos'),
           ),
-          Step(
-            title: Text('Infraestructura de alcantarillado'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  controller: _tipoAlcantarilladoController,
-                  decoration: InputDecoration(
-                      labelText: 'Tipo de sistema de alcantarillado'),
-                ),
-                TextFormField(
-                  controller: _estadoTratamientoAlcantarilladoController,
-                  decoration: InputDecoration(
-                      labelText: 'Estado de las instalaciones de tratamiento de aguas residuales'),
-                ),
-              ],
-            ),
+          TextFormField(
+            controller: estadoEdificaciones,
+            decoration: const InputDecoration(labelText: 'Estado de edificaciones cercanas'),
           ),
-          Step(
-            title: Text('Problemas específicos'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  controller: _problemasEspecificosController,
-                  decoration: InputDecoration(
-                      labelText: 'Descripción detallada de cualquier problema específico'),
-                ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Fotos o archivos adjuntos'),
-                ),
-              ],
-            ),
+        ],
+      ),
+    ),
+    Step(
+      state: currentStep > 2 ? StepState.complete : StepState.indexed,
+      isActive: currentStep >= 2,
+      title: const Text('Agua'),
+      content: Column(
+        children: [
+          TextFormField(
+            controller: calidadAgua,
+            decoration: const InputDecoration(labelText: 'Calidad del agua'),
           ),
-          Step(
-            title: Text('Comentarios adicionales'),
-            content: Column(
-              children: <Widget>[
-                TextFormField(
-                  controller: _comentariosAdicionalesController,
-                  decoration: InputDecoration(
-                      labelText: 'Comentarios adicionales'),
-                ),
-              ],
+          TextFormField(
+            controller: fuentesAgua,
+            decoration: const InputDecoration(labelText: 'Fuentes de agua cercanas'),
+          ),
+          TextFormField(
+            controller: problemasAgua,
+            decoration: const InputDecoration(labelText: 'Problemas específicos relacionados con el agua'),
+          ),
+        ],
+      ),
+    ),
+    Step(
+      state: currentStep > 3 ? StepState.complete : StepState.indexed,
+      isActive: currentStep >= 3,
+      title: const Text('Sistemas de Agua'),
+      content: Column(
+        children: [
+          TextFormField(
+            controller: tipoSuministros,
+            decoration: const InputDecoration(labelText: 'Tipo de suministro de agua'),
+          ),
+          TextFormField(
+            controller: estadoInstalaciones,
+            decoration: const InputDecoration(labelText: 'Estado de las instalaciones de tratamiento de agua'),
+          ),
+          TextFormField(
+            controller: cortesAgua,
+            decoration: const InputDecoration(labelText: 'Frecuencia y duración de cortes de agua'),
+          ),
+        ],
+      ),
+    ),
+    Step(
+      state: currentStep > 4 ? StepState.complete : StepState.indexed,
+      isActive: currentStep >= 4,
+      title: const Text('Infraestructura de aantarillado'),
+      content: Column(
+        children: [
+          TextFormField(
+            controller: tipoAlcantarillado,
+            decoration: const InputDecoration(labelText: 'Tipo de sistema de alcantarillado'),
+          ),
+          TextFormField(
+            controller: estadoAlcantarillado,
+            decoration: const InputDecoration(labelText: 'Estado de las instalaciones de tratamiento de aguas residuales'),
+          ),
+        ],
+      ),
+    ),
+    Step(
+      state: currentStep > 5 ? StepState.complete : StepState.indexed,
+      isActive: currentStep >= 5,
+      title: const Text('Problemas especificos'),
+      content: Column(
+        children: [
+          TextFormField(
+            controller: problemasEspecificos,
+            decoration: const InputDecoration(labelText: 'Descripción detallada de cualquier problema específico relacionado con la infraestructura o el agua'),
+          ),
+          //incluis elementos para subir archivos adjuntos o fotos
+        ],
+      ),
+    ),
+    Step(
+      state: currentStep > 6 ? StepState.complete : StepState.indexed,
+      isActive: currentStep >= 6,
+      title: const Text('Comentarios adicionales'),
+      content: Column(
+        children: [
+          TextFormField(
+            controller: comentarios,
+            decoration: const InputDecoration(labelText: 'Comentarios adicionales'),
+          ),
+
+
+    const Text(
+            'Your details have been confirmed successfully',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18),
+          ),
+          const SizedBox(height: 20),
+          const Spacer(),
+          Align(
+            alignment: Alignment.centerRight,
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isComplete = false;
+                  currentStep = 0;
+                  ubicacion.clear();
+                  tipoLugar.clear();
+                   estadoCarretera.clear();
+                   serviciosBasicos.clear();
+                   estadoEdificaciones.clear();
+                   calidadAgua.clear();
+                   fuentesAgua.clear();
+                   problemasAgua.clear();
+                   tipoSuministros.clear();
+                   estadoInstalaciones.clear();
+                   cortesAgua.clear();
+                   tipoAlcantarillado.clear();
+                   estadoAlcantarillado.clear();
+                   problemasEspecificos.clear();
+                   comentarios.clear();
+                });
+              },
+              child: const Text('RESET'),
             ),
           ),
         ],
       ),
-    );
-  }
-}
+    ),
+  ];
+
+  Widget buildSuccessPage() => const Center(
+    child: Text(
+      '¡Éxito!',
+      style: TextStyle(fontSize: 24),
+    ),
+  );
+}//

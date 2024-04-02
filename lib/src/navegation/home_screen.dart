@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:geo_visor_app/src/navegation/drawer.dart';
 import 'package:geo_visor_app/src/navegation/form.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'Profilepage.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +21,16 @@ class _HomeScreenState extends State<HomeScreen> {
     mapController = controller;
   }
 
+  //Navigate Profile
+  void goToProfilePage (){
+    //pop menu drawer
+    Navigator.pop(context);
+    //go to profile
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const Profilepage(),
+    ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,6 +41,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: Colors.indigoAccent,
         centerTitle: true,
+      ),
+
+
+      drawer: MyDrawer(
+        onProfileTap: goToProfilePage,
       ),
       body: GoogleMap(
         onMapCreated: _onMapCreated,
@@ -48,6 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
+
     );
+
   }
 }
