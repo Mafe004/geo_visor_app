@@ -237,3 +237,5 @@ class _FormularioInformacionState extends State<FormularioInformacion> {
     print('Tipo de lugar: ${_formData.tipoLugar}');
     print('Estado de las carreteras: ${_formData.estadoCarreteras}');
     print('Servicios básicos: ${_formData.serviciosBasicos}');
+  }
+}
