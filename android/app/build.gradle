@@ -2,8 +2,8 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-
     id 'com.google.gms.google-services'
+
 
 }
 
@@ -48,7 +48,7 @@ android {
         applicationId "com.example.geo_visor_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 20
+        minSdkVersion 21
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
@@ -71,6 +71,4 @@ flutter {
 
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:32.8.0')
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation "androidx.multidex:multidex:2.0.1"
 }

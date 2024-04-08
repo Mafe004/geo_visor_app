@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/src/navegation/drawer.dart';
 import 'package:geo_visor_app/src/navegation/form.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import 'Profilepage.dart';
+import '../profile/Profilepage.dart';
+import '../profile/drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
