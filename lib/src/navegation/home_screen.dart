@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:geo_visor_app/src/navegation/drawer.dart';
+import 'package:geo_visor_app/src/navegation/form.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+
+import 'Profilepage.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,45 +15,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late GoogleMapController mapController;
-  LatLng? _center;
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  late Position _currentPosition;
 
   @override
   void initState() {
     super.initState();
-    _getUserLocation();
+    _getCurrentLocation();
   }
 
-  void _getUserLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Verificar si el servicio de ubicación está habilitado
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Mostrar diálogo para habilitar servicios de ubicación
-      return;
-    }
-
-    // Verificar permisos de ubicación
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Mostrar diálogo de permisos
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Mostrar diálogo para ir a la configuración y habilitar permisos de ubicación manualmente
-      return;
-    }
-
-    // Obtener la posición del usuario
-    Position position = await Geolocator.getCurrentPosition(
+  void _getCurrentLocation() async {
+    final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     setState(() {
-      _center = LatLng(position.latitude, position.longitude);
+      _currentPosition = position;
     });
   }
 
@@ -57,8 +36,22 @@ class _HomeScreenState extends State<HomeScreen> {
     mapController = controller;
   }
 
+  //Navigate Profile
+  void goToProfilePage() {
+    //pop menu drawer
+    Navigator.pop(context);
+    //go to profile
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const Profilepage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    LatLng initialPosition =
+    LatLng(_currentPosition.latitude, _currentPosition.longitude);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -68,15 +61,29 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.indigoAccent,
         centerTitle: true,
       ),
-      body: _center != null
-          ? GoogleMap(
+      drawer: MyDrawer(
+        onProfileTap: goToProfilePage,
+      ),
+      body: GoogleMap(
         onMapCreated: _onMapCreated,
         initialCameraPosition: CameraPosition(
-          target: _center!,
+          target: initialPosition,
           zoom: 11.0,
         ),
-      )
-          : Center(child: CircularProgressIndicator()),
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blueAccent,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FormExampleApp()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

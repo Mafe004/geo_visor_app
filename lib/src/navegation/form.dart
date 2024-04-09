@@ -29,31 +29,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
   final comentarios = TextEditingController();
 
 
-  void saveDataToFirestore(GeoVisor) {
-    FirebaseFirestore.instance.collection('').add({
-      'ubicacion': ubicacion.text,
-      'tipoLugar': tipoLugar.text,
-      'estadoCarretera': estadoCarretera.text,
-      'serviciosBasicos': serviciosBasicos.text,
-      'estadoEdificaciones': estadoEdificaciones.text,
-      'calidadAgua': calidadAgua.text,
-      'fuentesAgua': fuentesAgua.text,
-      'problemasAgua': problemasAgua.text,
-      'tipoSuministros': tipoSuministros.text,
-      'estadoInstalaciones': estadoInstalaciones.text,
-      'cortesAgua': cortesAgua.text,
-      'tipoAlcantarillado': tipoAlcantarillado.text,
-      'estadoAlcantarillado': estadoAlcantarillado.text,
-      'problemasEspecificos': problemasEspecificos.text,
-      'comentarios': comentarios.text,
-    }).then((value) {
-      // Aquí puedes agregar cualquier lógica adicional después de guardar los datos
-      print('Data added successfully!');
-    }).catchError((error) {
-      // Maneja cualquier error que pueda ocurrir durante el proceso
-      print('Failed to add data: $error');
-    });
-  }
+
 
   bool isComplete = false;
 
@@ -224,7 +200,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
           ),
 
 
-    const Text(
+          const Text(
             'Your details have been confirmed successfully',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 18),
@@ -240,19 +216,19 @@ class _FormExampleAppState extends State<FormExampleApp> {
                   currentStep = 0;
                   ubicacion.clear();
                   tipoLugar.clear();
-                   estadoCarretera.clear();
-                   serviciosBasicos.clear();
-                   estadoEdificaciones.clear();
-                   calidadAgua.clear();
-                   fuentesAgua.clear();
-                   problemasAgua.clear();
-                   tipoSuministros.clear();
-                   estadoInstalaciones.clear();
-                   cortesAgua.clear();
-                   tipoAlcantarillado.clear();
-                   estadoAlcantarillado.clear();
-                   problemasEspecificos.clear();
-                   comentarios.clear();
+                  estadoCarretera.clear();
+                  serviciosBasicos.clear();
+                  estadoEdificaciones.clear();
+                  calidadAgua.clear();
+                  fuentesAgua.clear();
+                  problemasAgua.clear();
+                  tipoSuministros.clear();
+                  estadoInstalaciones.clear();
+                  cortesAgua.clear();
+                  tipoAlcantarillado.clear();
+                  estadoAlcantarillado.clear();
+                  problemasEspecificos.clear();
+                  comentarios.clear();
                 });
               },
               child: const Text('RESET'),
@@ -269,4 +245,4 @@ class _FormExampleAppState extends State<FormExampleApp> {
       style: TextStyle(fontSize: 24),
     ),
   );
-}//
+}
