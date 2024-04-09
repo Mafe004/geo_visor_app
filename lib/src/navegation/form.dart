@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FormExampleApp extends StatefulWidget {
   const FormExampleApp({Key? key}) : super(key: key);
@@ -27,9 +28,6 @@ class _FormExampleAppState extends State<FormExampleApp> {
   final estadoAlcantarillado = TextEditingController();
   final problemasEspecificos = TextEditingController();
   final comentarios = TextEditingController();
-
-
-
 
   bool isComplete = false;
 
@@ -75,6 +73,33 @@ class _FormExampleAppState extends State<FormExampleApp> {
       ),
     ),
   );
+
+  void saveDataToFirestore() {
+    FirebaseFirestore.instance.collection('Reportes').add({
+      'ubicacion': ubicacion.text,
+      'tipoLugar': tipoLugar.text,
+      'estadoCarretera': estadoCarretera.text,
+      'serviciosBasicos': serviciosBasicos.text,
+      'estadoEdificaciones': estadoEdificaciones.text,
+      'calidadAgua': calidadAgua.text,
+      'fuentesAgua': fuentesAgua.text,
+      'problemasAgua': problemasAgua.text,
+      'tipoSuministros': tipoSuministros.text,
+      'estadoInstalaciones': estadoInstalaciones.text,
+      'cortesAgua': cortesAgua.text,
+      'tipoAlcantarillado': tipoAlcantarillado.text,
+      'estadoAlcantarillado': estadoAlcantarillado.text,
+      'problemasEspecificos': problemasEspecificos.text,
+      'comentarios': comentarios.text,
+    }).then((value) {
+      // Aquí puedes agregar cualquier lógica adicional después de guardar los datos
+      print('Data added successfully!');
+    }).catchError((error) {
+      // Maneja cualquier error que pueda ocurrir durante el proceso
+      print('Failed to add data: $error');
+    });
+  }
+
 
   List<Step> steps() => [
     Step(
@@ -245,4 +270,4 @@ class _FormExampleAppState extends State<FormExampleApp> {
       style: TextStyle(fontSize: 24),
     ),
   );
-}
+}//

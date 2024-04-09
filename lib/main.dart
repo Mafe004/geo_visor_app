@@ -4,6 +4,8 @@ import 'package:geo_visor_app/src/navegation/button_nav.dart';
 import 'package:geo_visor_app/src/navegation/information.dart';
 import 'package:geo_visor_app/src/navegation/notipage.dart';
 import 'package:geo_visor_app/src/routing/routes.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 void main() => runApp(const MyApp());
