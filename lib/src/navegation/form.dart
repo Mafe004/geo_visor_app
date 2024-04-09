@@ -29,7 +29,31 @@ class _FormExampleAppState extends State<FormExampleApp> {
   final comentarios = TextEditingController();
 
 
-
+  void saveDataToFirestore(GeoVisor) {
+    FirebaseFirestore.instance.collection('').add({
+      'ubicacion': ubicacion.text,
+      'tipoLugar': tipoLugar.text,
+      'estadoCarretera': estadoCarretera.text,
+      'serviciosBasicos': serviciosBasicos.text,
+      'estadoEdificaciones': estadoEdificaciones.text,
+      'calidadAgua': calidadAgua.text,
+      'fuentesAgua': fuentesAgua.text,
+      'problemasAgua': problemasAgua.text,
+      'tipoSuministros': tipoSuministros.text,
+      'estadoInstalaciones': estadoInstalaciones.text,
+      'cortesAgua': cortesAgua.text,
+      'tipoAlcantarillado': tipoAlcantarillado.text,
+      'estadoAlcantarillado': estadoAlcantarillado.text,
+      'problemasEspecificos': problemasEspecificos.text,
+      'comentarios': comentarios.text,
+    }).then((value) {
+      // Aquí puedes agregar cualquier lógica adicional después de guardar los datos
+      print('Data added successfully!');
+    }).catchError((error) {
+      // Maneja cualquier error que pueda ocurrir durante el proceso
+      print('Failed to add data: $error');
+    });
+  }
 
   bool isComplete = false;
 
