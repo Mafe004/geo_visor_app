@@ -3,7 +3,7 @@ import 'package:geo_visor_app/src/navegation/drawer.dart';
 import 'package:geo_visor_app/src/navegation/form.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-
+import 'package:geocoding/geocoding.dart'; // Importa el plugin de geocoding
 import 'Profilepage.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,8 +16,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late GoogleMapController mapController;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  late Position _currentPosition;
-
+  Position? _currentPosition;
+  String? _currentAddress;
 
   @override
   void initState() {
@@ -27,21 +27,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _getCurrentLocation() async {
     final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+      desiredAccuracy: LocationAccuracy.high,
+    );
+    final address = await _getAddressFromLatLng(position);
     setState(() {
       _currentPosition = position;
+      _currentAddress = address;
     });
+  }
+
+  Future<String> _getAddressFromLatLng(Position position) async {
+    final coordinates = LatLng(position.latitude, position.longitude); // Usa LatLng
+    final List<Placemark> placemarks = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude); // Usa placemarkFromCoordinates
+    final Placemark place = placemarks[0];
+    return "${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}";
   }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
 
-  //Navigate Profile
+  // Navegar al perfil
   void goToProfilePage() {
-    //pop menu drawer
+    // Cierra el menú del drawer
     Navigator.pop(context);
-    //go to profile
+    // Navega al perfil
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const Profilepage()),
@@ -50,8 +60,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    LatLng initialPosition =
-    LatLng(_currentPosition.latitude, _currentPosition.longitude);
+    LatLng initialPosition = _currentPosition != null
+        ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
+        : LatLng(0, 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -65,14 +76,60 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: MyDrawer(
         onProfileTap: goToProfilePage,
       ),
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: initialPosition,
-          zoom: 11.0,
-        ),
-        myLocationEnabled: true,
-        myLocationButtonEnabled: true,
+      body: _currentPosition != null
+          ? Stack(
+        children: [
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: initialPosition,
+              zoom: 16.0,
+            ),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+          ),
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Latitud: ${_currentPosition!.latitude.toStringAsFixed(6)}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Longitud: ${_currentPosition!.longitude.toStringAsFixed(6)}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Dirección: $_currentAddress',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      )
+          : Center(
+        child: CircularProgressIndicator(),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
