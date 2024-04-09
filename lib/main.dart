@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geo_visor_app/src/auth/login_or_register.dart';
 import 'package:geo_visor_app/src/navegation/button_nav.dart';
 import 'package:geo_visor_app/src/routing/routes.dart';
 
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Geo Visor A&S',
-      home: HomePage(),
+      home: LoginOrRegister(),
 
     );
   }

@@ -4,7 +4,8 @@ import 'package:geo_visor_app/src/navegation/button.dart';
 import 'package:geo_visor_app/src/navegation/text_field.dart';
     
     class LoginPage extends StatefulWidget {
-      const LoginPage({super.key});
+      final Function()? onTap;
+      const LoginPage({super.key, required this.onTap});
     
       @override
       State<LoginPage> createState() => _LoginPageState();
@@ -61,7 +62,7 @@ import 'package:geo_visor_app/src/navegation/text_field.dart';
                   //sign in btn
                   MyButton(
                       onTap: (){},
-                      text: 'Registrar',
+                      text: 'Ingresar',
                   ),
 
                   const SizedBox(height: 25),
@@ -77,7 +78,7 @@ import 'package:geo_visor_app/src/navegation/text_field.dart';
                       ),
                       const SizedBox(width: 4),
                       GestureDetector(
-                        onTap: (){},
+                        onTap: widget.onTap,
                         child: const Text(
                           "Registrarse ahora",
                           style: TextStyle(
