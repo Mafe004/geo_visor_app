@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/src/navegation/drawer.dart';
-import 'package:geo_visor_app/src/navegation/form.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart'; // Importa el plugin de geocoding
 import 'Profilepage.dart';
+import 'drawer.dart';
+import 'form.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

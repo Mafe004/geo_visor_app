@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/src/navegation/my_list_tile.dart';
+
+import 'my_list_tile.dart';
 
 class MyDrawer extends StatelessWidget {
   final void Function ()? onProfileTap;

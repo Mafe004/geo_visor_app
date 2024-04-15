@@ -2,6 +2,8 @@
     package="com.example.google_maps_in_flutter">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:label="google_maps_in_flutter"
         android:icon="@mipmap/ic_launcher">

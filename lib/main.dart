@@ -1,41 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/src/navegation/home_screen.dart';
-import 'package:geo_visor_app/src/navegation/button_nav.dart';
-import 'package:geo_visor_app/src/navegation/information.dart';
-import 'package:geo_visor_app/src/navegation/notipage.dart';
+import 'package:firebase_core/firebase_core.dart'; // Agrega el import de Firebase
+import 'package:geo_visor_app/src/features/navegation/button_nav.dart';
 import 'package:geo_visor_app/src/routing/routes.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'firebase_options.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Geo Visor A&S',
       home: HomePage(),
-
     );
   }
 }
+
 class HomePage extends StatefulWidget {
-  const HomePage ({Key? key}) :super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int index=0;
-  Bnavigator ?myBnb;
+  int index = 0;
+  Bnavigator? myBnb; // ¿Es 'Bnavigator' la clase correcta?
 
   @override
   void initState() {
-    myBnb = Bnavigator(currentIndex: (i){
+    myBnb = Bnavigator(currentIndex: (i) {
       setState(() {
         index = i;
       });
@@ -45,10 +48,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       bottomNavigationBar: myBnb,
       body: Routes(index: index),
-
     );
   }
 }
