@@ -24,25 +24,6 @@
           "other_platform_oauth_client": []
         }
       }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:190836327076:android:a7179a8ac6057fe74c5c31",
-        "android_client_info": {
-          "package_name": "com.example.geovisorapp"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAl1hp1AdOzZzI5HSigrJ3wceoe87_cAcw"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
     }
   ],
   "configuration_version": "1"

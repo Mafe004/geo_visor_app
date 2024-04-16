@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart'; // Importa el plugin de geocoding
-import 'Profilepage.dart';
-import 'drawer.dart';
-import 'form.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -48,15 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Navegar al perfil
-  void goToProfilePage() {
-    // Cierra el menú del drawer
-    Navigator.pop(context);
-    // Navega al perfil
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const Profilepage()),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.indigoAccent,
         centerTitle: true,
       ),
-      drawer: MyDrawer(
-        onProfileTap: goToProfilePage,
-      ),
+
       body: _currentPosition != null
           ? Stack(
         children: [
@@ -134,10 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const FormExampleApp()),
-          );
+
         },
         child: const Icon(Icons.add),
       ),

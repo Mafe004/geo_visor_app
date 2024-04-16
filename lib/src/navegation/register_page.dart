@@ -1,26 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/src/navegation/text_field.dart';
-
-import 'button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
-  final Function()? onTap;
-  const RegisterPage({super.key, required this.onTap});
+  final VoidCallback? onTap;
+  const RegisterPage({Key? key, this.onTap}) : super(key: key);
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  @override
-  //txt edit control
-  final emailTextcontroller = TextEditingController();
-  final passwordTextcontroller = TextEditingController();
-  final confirmPasswordTextcontroller = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  Future<void> _register() async {
+    try {
+      final UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      final User? user = userCredential.user;
+      // Si el registro es exitoso, podrías navegar a otra página
+      widget.onTap?.call(); // Llama a la función onTap para navegar a la página de inicio de sesión
+    } catch (e) {
+      print(e.toString());
+      // Manejar errores de registro
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       backgroundColor: Colors.blueAccent,
       body: SafeArea(
         child: Padding(
@@ -28,61 +39,70 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
-              //logo
               const Icon(
                 Icons.water,
                 size: 100,
               ),
-
               const SizedBox(height: 50),
-
-              //Msg
-              const Text("Crear Cuenta",
-              ),
-
+              const Text("Crear Cuenta"),
               const SizedBox(height: 25),
-
-              //emailtxt
-              MyTextField(
-                controller: emailTextcontroller,
-                hintText: 'email',
-                obscureText: false,
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  filled: true,
+                  hintText: 'email',
+                  hintStyle: TextStyle(color: Colors.black),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
               ),
-
               const SizedBox(height: 10),
-              //pswtxt
-              MyTextField(
-                controller: passwordTextcontroller,
-                hintText: 'Password',
+              TextField(
+                controller: passwordController,
                 obscureText: true,
+                decoration: const InputDecoration(
+                  filled: true,
+                  hintText: 'Password',
+                  hintStyle: TextStyle(color: Colors.black),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
               ),
-
               const SizedBox(height: 10),
-
-              //confirmpswtxt
-              MyTextField(
-                controller: confirmPasswordTextcontroller,
-                hintText: 'Confirmar Password',
+              TextField(
+                controller: confirmPasswordController,
                 obscureText: true,
+                decoration: const InputDecoration(
+                  filled: true,
+                  hintText: 'Confirmar Password',
+                  hintStyle: TextStyle(color: Colors.black),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
               ),
-
               const SizedBox(height: 10),
-              //sign in btn
-              MyButton(
-                onTap: (){},
-                text: 'Registrar',
+              ElevatedButton(
+                onPressed: _register,
+                child: const Text('Registrar'),
               ),
-
               const SizedBox(height: 25),
-
-              //register
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Ya tienes cuenta?",
+                  const Text("Ya tienes cuenta?",
                     style: TextStyle(
-                      color: Colors.grey[700],
                     ),
                   ),
                   const SizedBox(width: 4),
