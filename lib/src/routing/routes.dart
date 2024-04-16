@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import '../features/navegation/form.dart';
 import '../features/navegation/information.dart';
 import '../features/navegation/notipage.dart';
 import '../navegation/home_screen.dart';
@@ -14,6 +15,7 @@ class Routes extends StatelessWidget {
     List<Widget> mylist=[
       const InfoPage(),
       const HomeScreen(),
+      const FormExampleApp(),
       const NotifPage(),
     ];
     return mylist[index];
