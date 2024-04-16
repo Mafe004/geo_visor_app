@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geo_visor_app/src/features/navegation/button_nav.dart';
+import 'package:geo_visor_app/src/navegation/login_page.dart';
 import 'package:geo_visor_app/src/routing/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -16,30 +17,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Geo Visor A&S',
-      home: LoginPage(), // Asegúrate de que la página de inicio sea LoginPage
+      home: AuthenticationWrapper(), // Utiliza AuthenticationWrapper para determinar qué página mostrar
     );
   }
 }
 
-class LoginPage extends StatelessWidget {
+class AuthenticationWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Login Page'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
-          },
-          child: Text('Go to HomePage'),
-        ),
-      ),
-    );
+    // Aquí puedes agregar lógica para verificar si el usuario está autenticado
+    final bool isUserLoggedIn = false; // Cambia a tu lógica real de autenticación
+
+    return isUserLoggedIn ? const HomePage() : LoginPage(); // Mostrar LoginPage si el usuario no está autenticado
   }
 }
 
@@ -72,4 +61,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
