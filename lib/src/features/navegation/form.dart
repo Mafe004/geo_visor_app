@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class FormExampleApp extends StatefulWidget {
   const FormExampleApp({Key? key}) : super(key: key);
@@ -32,6 +33,15 @@ class _FormExampleAppState extends State<FormExampleApp> {
   bool isComplete = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize Firebase
+    Firebase.initializeApp().then((value) {
+      // Firebase is initialized
+    });
+  }
+
+  @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Flutter Stepper widget')),
     body: isComplete
@@ -42,6 +52,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
       currentStep: currentStep,
       onStepContinue: () {
         if (isLastStep) {
+          saveDataToFirestore();
           setState(() => isComplete = true);
         } else {
           setState(() => currentStep += 1);
@@ -91,11 +102,10 @@ class _FormExampleAppState extends State<FormExampleApp> {
       'estadoAlcantarillado': estadoAlcantarillado.text,
       'problemasEspecificos': problemasEspecificos.text,
       'comentarios': comentarios.text,
+      'timestamp': FieldValue.serverTimestamp(), // Add this line to save the timestamp
     }).then((value) {
-      // Aquí puedes agregar cualquier lógica adicional después de guardar los datos
       print('Data added successfully!');
     }).catchError((error) {
-      // Maneja cualquier error que pueda ocurrir durante el proceso
       print('Failed to add data: $error');
     });
   }
