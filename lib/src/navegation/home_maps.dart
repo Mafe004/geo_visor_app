@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart'; // Importa el plugin de geocoding
+import 'package:geocoding/geocoding.dart';
+import '../features/navegation/form.dart';
 
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeMaps extends StatefulWidget {
+  const HomeMaps({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _HomeMapsState createState() => _HomeMapsState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeMapsState extends State<HomeMaps> {
   late GoogleMapController mapController;
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Position? _currentPosition;
   String? _currentAddress;
 
@@ -35,8 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<String> _getAddressFromLatLng(Position position) async {
-    final coordinates = LatLng(position.latitude, position.longitude); // Usa LatLng
-    final List<Placemark> placemarks = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude); // Usa placemarkFromCoordinates
+    final coordinates = LatLng(position.latitude, position.longitude);
+    final List<Placemark> placemarks =
+    await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude);
     final Placemark place = placemarks[0];
     return "${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}";
   }
@@ -44,9 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
-
-  // Navegar al perfil
-
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.indigoAccent,
         centerTitle: true,
       ),
-
       body: _currentPosition != null
           ? Stack(
         children: [
@@ -89,6 +85,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
+                    'Dirección: $_currentAddress',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
                     'Latitud: ${_currentPosition!.latitude.toStringAsFixed(6)}',
                     style: TextStyle(
                       fontSize: 16,
@@ -97,14 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Text(
                     'Longitud: ${_currentPosition!.longitude.toStringAsFixed(6)}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Dirección: $_currentAddress',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -122,7 +118,15 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
         onPressed: () {
-
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FormExampleApp(
+                initialPosition: _currentPosition,
+                initialAddress: _currentAddress,
+              ),
+            ),
+          );
         },
         child: const Icon(Icons.add),
       ),

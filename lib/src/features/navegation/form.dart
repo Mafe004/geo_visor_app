@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:geolocator/geolocator.dart';
 
 class FormExampleApp extends StatefulWidget {
-  const FormExampleApp({Key? key}) : super(key: key);
+  final Position? initialPosition;
+  final String? initialAddress;
+
+  const FormExampleApp({
+    Key? key,
+    this.initialPosition,
+    this.initialAddress,
+  }) : super(key: key);
 
   @override
   State<FormExampleApp> createState() => _FormExampleAppState();
@@ -33,15 +40,6 @@ class _FormExampleAppState extends State<FormExampleApp> {
   bool isComplete = false;
 
   @override
-  void initState() {
-    super.initState();
-    // Initialize Firebase
-    Firebase.initializeApp().then((value) {
-      // Firebase is initialized
-    });
-  }
-
-  @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Flutter Stepper widget')),
     body: isComplete
@@ -52,8 +50,8 @@ class _FormExampleAppState extends State<FormExampleApp> {
       currentStep: currentStep,
       onStepContinue: () {
         if (isLastStep) {
-          saveDataToFirestore();
           setState(() => isComplete = true);
+          saveDataToFirestore();
         } else {
           setState(() => currentStep += 1);
         }
@@ -85,9 +83,11 @@ class _FormExampleAppState extends State<FormExampleApp> {
     ),
   );
 
-  void saveDataToFirestore() {
+  void saveDataToFirestore() async {
+    Position position = await _getCurrentLocation();
+
     FirebaseFirestore.instance.collection('Reportes').add({
-      'ubicacion': ubicacion.text,
+      'ubicacion': GeoPoint(position.latitude, position.longitude),
       'tipoLugar': tipoLugar.text,
       'estadoCarretera': estadoCarretera.text,
       'serviciosBasicos': serviciosBasicos.text,
@@ -102,14 +102,20 @@ class _FormExampleAppState extends State<FormExampleApp> {
       'estadoAlcantarillado': estadoAlcantarillado.text,
       'problemasEspecificos': problemasEspecificos.text,
       'comentarios': comentarios.text,
-      'timestamp': FieldValue.serverTimestamp(), // Add this line to save the timestamp
     }).then((value) {
+      // Aquí puedes agregar cualquier lógica adicional después de guardar los datos
       print('Data added successfully!');
     }).catchError((error) {
+      // Maneja cualquier error que pueda ocurrir durante el proceso
       print('Failed to add data: $error');
     });
   }
 
+  Future<Position> _getCurrentLocation() async {
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
 
   List<Step> steps() => [
     Step(
@@ -121,6 +127,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
           TextFormField(
             controller: ubicacion,
             decoration: const InputDecoration(labelText: 'Ubicación'),
+            readOnly: true,
           ),
           TextFormField(
             controller: tipoLugar,
@@ -212,7 +219,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
     Step(
       state: currentStep > 5 ? StepState.complete : StepState.indexed,
       isActive: currentStep >= 5,
-      title: const Text('Problemas especificos'),
+      title: const Text('Problemas específicos'),
       content: Column(
         children: [
           TextFormField(
@@ -232,13 +239,6 @@ class _FormExampleAppState extends State<FormExampleApp> {
           TextFormField(
             controller: comentarios,
             decoration: const InputDecoration(labelText: 'Comentarios adicionales'),
-          ),
-
-
-          const Text(
-            'Your details have been confirmed successfully',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 20),
           const Spacer(),
@@ -280,4 +280,4 @@ class _FormExampleAppState extends State<FormExampleApp> {
       style: TextStyle(fontSize: 24),
     ),
   );
-}//
+}
