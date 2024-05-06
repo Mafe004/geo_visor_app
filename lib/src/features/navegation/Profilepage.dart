@@ -1,43 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:geo_visor_app/src/navegation/Text_box.dart';
 
-class Profilepage extends StatefulWidget {
-  const Profilepage({super.key});
+
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
-  State<Profilepage> createState() => _ProfilepageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilepageState extends State<Profilepage> {
+class _ProfilePageState extends State<ProfilePage> {
+  // Usuario actual
+  final currentUser = 'String';
 
-  //user
-  final currentUser = String;
-
-  //editarcampo
+  // Método para editar campo
   Future<void> editField(String field) async {
-
+    // Lógica para editar el campo
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("Perfil"),
-      backgroundColor: Colors.blueAccent,
+        title: Text("Perfil"),
+        backgroundColor: Colors.blueAccent,
       ),
       body: ListView(
         children: [
-          const SizedBox(height: 50),
-          //foto perfil
-          Icon(Icons.person,
-            size: 72,
-          ),
+          SizedBox(height: 50),
+          // Foto de perfil
+          Icon(Icons.person, size: 72),
 
-          const SizedBox(height: 10),
-          //Email
+          SizedBox(height: 10),
+          // Email
 
-
-          const SizedBox(height: 50),
-          //Detalles
+          SizedBox(height: 50),
+          // Detalles
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
             child: Text(
@@ -46,12 +44,92 @@ class _ProfilepageState extends State<Profilepage> {
             ),
           ),
 
-          //usuario
-          MyTextBox(text: 'Prueba', sectionName: 'Nombre Usuario', onPressed: () => editField('Nombre Usuario'),
+          // Usuario
+          MyTextBox(
+            text: 'Prueba',
+            sectionName: 'Nombre Usuario',
+            onPressed: () => editField('Nombre Usuario'),
           ),
-          //historial
+          // Historial
+          // Setting Notification
+          // Elemento de perfil
+          SizedBox(height: 20),
+          itemProfile("Notificacion", Icons.add_alert_sharp, () {
+            // Navegar a la pantalla de ajustes
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsPage()),
+            );
+          }),
         ],
       ),
+    );
+  }
+
+  Widget itemProfile(String title, IconData iconData, VoidCallback onPressed) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              offset: Offset(0, 3),
+              spreadRadius: 1,
+              blurRadius: 10,
+            )
+          ]
+      ),
+      child: ListTile(
+        title: Text(title),
+        leading: Icon(iconData),
+        trailing: Icon(Icons.arrow_forward_ios_outlined),
+        onTap: onPressed,
+      ),
+    );
+  }
+}
+
+// Nueva pantalla de ajustes
+class SettingsPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Configuración de Notificaciones"),
+      ),
+      body: ListView(
+        shrinkWrap: true,
+        children: [
+          SwitchItem(text: "Notificaciones Generales"),
+          SwitchItem(text: "Notificaciones Entidades"),
+        ],
+      ),
+    );
+  }
+}
+
+class SwitchItem extends StatefulWidget {
+  final String text;
+
+  const SwitchItem({Key? key, required this.text}) : super(key: key);
+
+  @override
+  State<SwitchItem> createState() => _SwitchItemState();
+}
+
+class _SwitchItemState extends State<SwitchItem> {
+  bool isSelected = false;
+  void itemSwitch(bool value){
+    setState(() {
+      isSelected = !isSelected;
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return  ListTile(
+      title: Text(widget.text),
+      leading: const Icon(Icons.notifications),
+      trailing: Switch(value: isSelected, onChanged: itemSwitch),
     );
   }
 }
