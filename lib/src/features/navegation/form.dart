@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'dart:io';
 
 class FormExampleApp extends StatefulWidget {
-  final Position? initialPosition;
-  final String? initialAddress;
-
-  const FormExampleApp({
-    Key? key,
-    this.initialPosition,
-    this.initialAddress,
-  }) : super(key: key);
+  const FormExampleApp({Key? key}) : super(key: key);
 
   @override
   State<FormExampleApp> createState() => _FormExampleAppState();
@@ -37,7 +34,21 @@ class _FormExampleAppState extends State<FormExampleApp> {
   final problemasEspecificos = TextEditingController();
   final comentarios = TextEditingController();
 
+  List<File> selectedImages = [];
+
   bool isComplete = false;
+  Position? currentPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize Firebase
+    Firebase.initializeApp().then((value) {
+      // Firebase is initialized
+    });
+    // Obtain current location
+    _getCurrentLocation();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -50,8 +61,8 @@ class _FormExampleAppState extends State<FormExampleApp> {
       currentStep: currentStep,
       onStepContinue: () {
         if (isLastStep) {
-          setState(() => isComplete = true);
           saveDataToFirestore();
+          setState(() => isComplete = true);
         } else {
           setState(() => currentStep += 1);
         }
@@ -83,11 +94,9 @@ class _FormExampleAppState extends State<FormExampleApp> {
     ),
   );
 
-  void saveDataToFirestore() async {
-    Position position = await _getCurrentLocation();
-
+  void saveDataToFirestore() {
     FirebaseFirestore.instance.collection('Reportes').add({
-      'ubicacion': GeoPoint(position.latitude, position.longitude),
+      'ubicacion': ubicacion.text,
       'tipoLugar': tipoLugar.text,
       'estadoCarretera': estadoCarretera.text,
       'serviciosBasicos': serviciosBasicos.text,
@@ -102,19 +111,26 @@ class _FormExampleAppState extends State<FormExampleApp> {
       'estadoAlcantarillado': estadoAlcantarillado.text,
       'problemasEspecificos': problemasEspecificos.text,
       'comentarios': comentarios.text,
+      'timestamp': FieldValue.serverTimestamp(), // Add this line to save the timestamp
+      'images': selectedImages.map((image) => image.path).toList(), // Add this line to save image paths
+      'latitude': currentPosition?.latitude,
+      'longitude': currentPosition?.longitude,
     }).then((value) {
-      // Aquí puedes agregar cualquier lógica adicional después de guardar los datos
       print('Data added successfully!');
     }).catchError((error) {
-      // Maneja cualquier error que pueda ocurrir durante el proceso
       print('Failed to add data: $error');
     });
   }
 
-  Future<Position> _getCurrentLocation() async {
-    return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+  Future<void> _getCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        currentPosition = position;
+      });
+    } catch (e) {
+      print('Error getting location: $e');
+    }
   }
 
   List<Step> steps() => [
@@ -126,8 +142,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
         children: [
           TextFormField(
             controller: ubicacion,
-            decoration: const InputDecoration(labelText: 'Ubicación'),
-            readOnly: true,
+            decoration: const InputDecoration(labelText: 'Dirección'),
           ),
           TextFormField(
             controller: tipoLugar,
@@ -144,7 +159,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
         children: [
           TextFormField(
             controller: estadoCarretera,
-            decoration: const InputDecoration(labelText: 'Estado de las carreteras o cales de acceso'),
+            decoration: const InputDecoration(labelText: 'Estado de las carreteras o calles de acceso'),
           ),
           TextFormField(
             controller: serviciosBasicos,
@@ -202,7 +217,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
     Step(
       state: currentStep > 4 ? StepState.complete : StepState.indexed,
       isActive: currentStep >= 4,
-      title: const Text('Infraestructura de aantarillado'),
+      title: const Text('Infraestructura de alcantarillado'),
       content: Column(
         children: [
           TextFormField(
@@ -226,7 +241,10 @@ class _FormExampleAppState extends State<FormExampleApp> {
             controller: problemasEspecificos,
             decoration: const InputDecoration(labelText: 'Descripción detallada de cualquier problema específico relacionado con la infraestructura o el agua'),
           ),
-          //incluis elementos para subir archivos adjuntos o fotos
+          ElevatedButton(
+            onPressed: () => _showImageOptions(),
+            child: Text('Adjuntar Fotos (${selectedImages.length}/5)'),
+          ),
         ],
       ),
     ),
@@ -240,6 +258,11 @@ class _FormExampleAppState extends State<FormExampleApp> {
             controller: comentarios,
             decoration: const InputDecoration(labelText: 'Comentarios adicionales'),
           ),
+          const Text(
+            'Your details have been confirmed successfully',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18),
+          ),
           const SizedBox(height: 20),
           const Spacer(),
           Align(
@@ -249,6 +272,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
                 setState(() {
                   isComplete = false;
                   currentStep = 0;
+                  selectedImages.clear();
                   ubicacion.clear();
                   tipoLugar.clear();
                   estadoCarretera.clear();
@@ -280,4 +304,62 @@ class _FormExampleAppState extends State<FormExampleApp> {
       style: TextStyle(fontSize: 24),
     ),
   );
+
+  Future<void> _showImageOptions() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.photo_library),
+              title: Text('Seleccionar de la galería'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImages();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.camera_alt),
+              title: Text('Tomar una foto'),
+              onTap: () {
+                Navigator.pop(context);
+                _takePhoto();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImages() async {
+    final pickedImages = await ImagePicker().pickMultiImage(
+      maxHeight: 1024,
+      maxWidth: 1024,
+      imageQuality: 75,
+    );
+
+    if (pickedImages != null) {
+      setState(() {
+        selectedImages.addAll(pickedImages.map((image) => File(image.path)));
+      });
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    final pickedImage = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      maxHeight: 1024,
+      maxWidth: 1024,
+      imageQuality: 75,
+    );
+
+    if (pickedImage != null) {
+      setState(() {
+        selectedImages.add(File(pickedImage.path));
+      });
+    }
+  }
 }

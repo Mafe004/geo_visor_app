@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'register_page.dart';
 import '../../main.dart';
 
 class LoginPage extends StatefulWidget {
@@ -94,7 +95,11 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () {
-                      // Aquí podrías definir la lógica para la navegación a la página de registro
+                      // Navegar a la página de registro cuando se toque el texto
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegisterPage()),
+                      );
                     },
                     child: const Text(
                       "Registrarse ahora",
