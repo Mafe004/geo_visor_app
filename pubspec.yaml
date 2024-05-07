@@ -24,6 +24,8 @@ dependencies:
   google_maps_flutter: ^2.6.0
   firebase_cloud_firestore: ^4.15.8
   firebase_messaging: ^14.9.1
+  firebase_analytics: ^10.10.4
+  flutter_local_notifications: ^17.1.2
 
 dev_dependencies:
   flutter_test:
