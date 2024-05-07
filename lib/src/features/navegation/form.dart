@@ -6,6 +6,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:io';
 
+void main() {
+  runApp(MaterialApp(
+    title: 'Form Example',
+    home: FormExampleApp(),
+  ));
+}
+
 class FormExampleApp extends StatefulWidget {
   const FormExampleApp({Key? key}) : super(key: key);
 

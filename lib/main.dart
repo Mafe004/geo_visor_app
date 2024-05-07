@@ -18,7 +18,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Geo Visor A&S',
       home: AuthenticationWrapper(), // Utiliza AuthenticationWrapper para determinar qué página mostrar
     );

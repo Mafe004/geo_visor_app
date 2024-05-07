@@ -1,66 +1,145 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class InfoPage extends StatelessWidget {
+class InfoPage extends StatefulWidget {
   const InfoPage({Key? key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<News> news = [
-      News(
-        title: 'Noticia 1',
-        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eros augue, volutpat in vestibulum a, porta a ante. Phasellus aliquam mi mauris, quis tincidunt elit rutrum tristique.',
-        imageUrl: 'https://via.placeholder.com/150',
-      ),
-      News(
-        title: 'Noticia 2',
-        description: 'Praesent feugiat faucibus tempor. Cras id dui in felis malesuada mollis et eget purus. Proin rhoncus nisl metus, eget hendrerit lacus consectetur quis. Sed ac orci gravida, bibendum turpis facilisis, maximus mauris.',
-        imageUrl: 'https://via.placeholder.com/150',
-      ),
-      News(
-        title: 'Noticia 3',
-        description: 'Aliquam erat volutpat. Nam accumsan rhoncus ligula et pharetra. Mauris finibus interdum magna, vel fringilla nunc sagittis eget. Nullam a augue ac ante euismod vehicula.',
-        imageUrl: 'https://via.placeholder.com/150',
-      ),
-      News(
-        title: 'Noticia 4',
-        description: 'Aliquam erat volutpat. Nam accumsan rhoncus ligula et pharetra. Mauris finibus interdum magna, vel fringilla nunc sagittis eget. Nullam a augue ac ante euismod vehicula.',
-        imageUrl: 'https://via.placeholder.com/150',
-      ),
-      News(
-        title: 'Noticia 5',
-        description: 'Aliquam erat volutpat. Nam accumsan rhoncus ligula et pharetra. Mauris finibus interdum magna, vel fringilla nunc sagittis eget. Nullam a augue ac ante euismod vehicula.',
-        imageUrl: 'https://via.placeholder.com/150',
-      ),
-    ];
+  _InfoPageState createState() => _InfoPageState();
+}
 
+class _InfoPageState extends State<InfoPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Información'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'Mis Reportes'),
+            Tab(text: 'Reportes Generales'),
+          ],
+        ),
       ),
-      body: ListView.builder(
-        itemCount: news.length,
-        itemBuilder: (context, index) {
-          return Card(
-            margin: EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: ListTile(
-              leading: Image.network(news[index].imageUrl),
-              title: Text(news[index].title),
-              subtitle: Text(news[index].description),
-            ),
-          );
-        },
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          MyReportsPage(),
+          GeneralReportsPage(),
+        ],
       ),
     );
   }
 }
 
-class News {
-  final String title;
-  final String description;
-  final String imageUrl;
+class MyReportsPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Center(child: Text('Usuario no autenticado'));
+    }
 
-  News({required this.title, required this.description, required this.imageUrl});
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Reportes')
+          .where('userId', isEqualTo: user.uid) // Filtra por el ID único del usuario
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        final reports = snapshot.data?.docs ?? [];
+        return ListView.builder(
+          itemCount: reports.length,
+          itemBuilder: (context, index) {
+            final data = reports[index].data() as Map<String, dynamic>;
+            return ListTile(
+              title: Text(data['ubicacion']),
+              subtitle: Text(data['tipoLugar']),
+            );
+          },
+        );
+      },
+    );
+  }
 }
+
+class GeneralReportsPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('Reportes').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        final reports = snapshot.data?.docs ?? [];
+        return ListView.builder(
+          itemCount: reports.length,
+          itemBuilder: (context, index) {
+            final data = reports[index].data() as Map<String, dynamic>;
+            // Obtener una lista de las rutas de las imágenes si están disponibles
+            final List<String> imagePaths = List<String>.from(data['images'] ?? []);
+
+            return Card(
+              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: ListTile(
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ubicación: ${data['ubicacion']}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text('Tipo de lugar: ${data['tipoLugar']}'),
+                    // Mostrar otros datos aquí...
+                  ],
+                ),
+                subtitle: imagePaths.isNotEmpty
+                    ? SizedBox(
+                  height: 100,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: imagePaths.length,
+                    itemBuilder: (context, index) {
+                      // Muestra una miniatura de la imagen si está disponible
+                      return Padding(
+                        padding: EdgeInsets.only(right: 8),
+                        child: Image.network(
+                          imagePaths[index],
+                          width: 100,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
+                  ),
+                )
+                    : null,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+
+
