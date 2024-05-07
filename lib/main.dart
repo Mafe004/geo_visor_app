@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geo_visor_app/src/features/navegation/button_nav.dart';
+import 'package:geo_visor_app/src/features/notification/push_noti_provider.dart';
 import 'package:geo_visor_app/src/navegation/login_page.dart';
 import 'package:geo_visor_app/src/routing/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  PushNotiPro().initNotification();
   runApp(const MyApp());
 }
 
