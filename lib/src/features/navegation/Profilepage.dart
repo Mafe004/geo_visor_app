@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_cloud_firestore/firebase_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_visor_app/src/navegation/Text_box.dart';
 
@@ -90,7 +92,15 @@ class _ProfilePageState extends State<ProfilePage> {
 }
 
 // Nueva pantalla de ajustes
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool generalNotificationsEnabled = true;
+  bool entityNotificationsEnabled = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,36 +110,64 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         shrinkWrap: true,
         children: [
-          SwitchItem(text: "Notificaciones Generales"),
-          SwitchItem(text: "Notificaciones Entidades"),
+          SwitchItem(
+            text: "Notificaciones Generales",
+            value: generalNotificationsEnabled,
+            onChanged: (value) {
+              setState(() {
+                generalNotificationsEnabled = value;
+                updateNotificationSetting("notificaciones_generales", value);
+              });
+            },
+          ),
+          SwitchItem(
+            text: "Notificaciones Entidades",
+            value: entityNotificationsEnabled,
+            onChanged: (value) {
+              setState(() {
+                entityNotificationsEnabled = value;
+                updateNotificationSetting("notificaciones_entidades", value);
+              });
+            },
+          ),
         ],
       ),
     );
   }
-}
 
-class SwitchItem extends StatefulWidget {
-  final String text;
-
-  const SwitchItem({Key? key, required this.text}) : super(key: key);
-
-  @override
-  State<SwitchItem> createState() => _SwitchItemState();
-}
-
-class _SwitchItemState extends State<SwitchItem> {
-  bool isSelected = false;
-  void itemSwitch(bool value){
-    setState(() {
-      isSelected = !isSelected;
-    });
+  void updateNotificationSetting(String field, bool value) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('Usuarios')
+            .doc(user.uid)
+            .update({field: value});
+      }
+    } catch (e) {
+      print("Error updating notification setting: $e");
+    }
   }
+}
+
+class SwitchItem extends StatelessWidget {
+  final String text;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const SwitchItem({
+    Key? key,
+    required this.text,
+    required this.value,
+    required this.onChanged,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return  ListTile(
-      title: Text(widget.text),
+    return ListTile(
+      title: Text(text),
       leading: const Icon(Icons.notifications),
-      trailing: Switch(value: isSelected, onChanged: itemSwitch),
+      trailing: Switch(value: value, onChanged: onChanged),
     );
   }
 }

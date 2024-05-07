@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:geo_visor_app/src/features/navegation/Profilepage.dart';
 import '../features/navegation/form.dart';
 import '../features/navegation/information.dart';
 import '../features/navegation/notipage.dart';
@@ -16,7 +17,7 @@ class Routes extends StatelessWidget {
       const InfoPage(),
       const HomeScreen(),
       const FormExampleApp(),
-      const NotifPage(),
+      const ProfilePage(),
     ];
     return mylist[index];
   }
