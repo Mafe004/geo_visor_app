@@ -1,7 +1,10 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'register_page.dart';
-import '../../main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geo_visor_app/src/navegation/register_page.dart';
+
+import '../../main.dart'; // Importa Firestore
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -21,13 +24,23 @@ class _LoginPageState extends State<LoginPage> {
         password: passwordController.text,
       );
       final User? user = userCredential.user;
-      // Si el inicio de sesión es exitoso, navega al HomeScreen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()), // Cambiar a HomePage
-      );
+
+      if (user != null) {
+        // Guarda el token en la información del usuario en Firestore
+        final String? token = await FirebaseMessaging.instance.getToken();
+        await FirebaseFirestore.instance.collection('Usuarios').doc(user.uid).update({
+          'notificationToken': token,
+        });
+
+        // Navega al HomeScreen después de iniciar sesión
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()), // Cambiar a HomePage
+        );
+      }
     } catch (e) {
       print(e.toString());
+
       // Manejar errores de inicio de sesión
     }
   }
