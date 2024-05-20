@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_visor_app/src/features/navegation/button_nav.dart';
 import 'package:geo_visor_app/src/navegation/login_page.dart';
@@ -39,7 +40,6 @@ class AuthenticationWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isUserLoggedIn = false; // Cambia a tu lógica real de autenticación
-
     return isUserLoggedIn ? const HomePage() : LoginPage();
   }
 }
@@ -96,12 +96,43 @@ void sendLocalNotification(String title, String body) async {
 }
 
 // Función para escuchar cambios en la colección de reportes
+// Función para escuchar cambios en la colección de reportes
 void listenForReportChanges() {
   FirebaseFirestore.instance.collection('Reportes').snapshots().listen((snapshot) {
     for (var change in snapshot.docChanges) {
       if (change.type == DocumentChangeType.added) {
-        sendLocalNotification('Nuevo reporte', 'Se ha enviado un nuevo reporte');
+        // Verificar si las notificaciones generales están habilitadas antes de enviar el mensaje
+        sendMessageIfNotificationsEnabled();
       }
     }
   });
 }
+// Función para enviar el mensaje si las notificaciones generales están habilitadas
+void sendMessageIfNotificationsEnabled() async {
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Obtener el estado de las notificaciones generales
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Usuarios')
+          .doc(user.uid)
+          .get();
+      final generalNotificationsEnabled = snapshot.data()?['notificaciones_generales'];
+
+      // Verificar si se obtuvo correctamente el estado de las notificaciones generales
+      print('Estado de notificaciones generales: $generalNotificationsEnabled');
+
+      // Verificar si las notificaciones generales están habilitadas
+      if (generalNotificationsEnabled == true) {
+        // Enviar el mensaje
+        sendLocalNotification('Nuevo reporte', 'Se ha enviado un nuevo reporte');
+      } else {
+        print('Las notificaciones generales están desactivadas. El mensaje no fue enviado.');
+      }
+    }
+  } catch (e) {
+    print("Error al enviar el mensaje: $e");
+  }
+}
+
+
