@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+
 import '../features/navegation/form.dart';
 
 class HomeMaps extends StatefulWidget {
@@ -122,8 +123,6 @@ class _HomeMapsState extends State<HomeMaps> {
             context,
             MaterialPageRoute(
               builder: (context) => FormExampleApp(
-                initialPosition: _currentPosition,
-                initialAddress: _currentAddress,
               ),
             ),
           );
@@ -134,3 +133,4 @@ class _HomeMapsState extends State<HomeMaps> {
     );
   }
 }
+

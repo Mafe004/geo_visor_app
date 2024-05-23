@@ -20,7 +20,7 @@ dependencies:
   firebase_core: ^2.29.0
   firebase_auth: ^4.19.1
   geolocator: ^7.6.2
-  geocoding: ^2.2.2
+  geocoding: ^3.0.0
   google_maps_flutter: ^2.6.0
   firebase_cloud_firestore: ^4.15.8
   firebase_messaging: ^14.9.1

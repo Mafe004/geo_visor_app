@@ -3,7 +3,6 @@ import 'package:firebase_cloud_firestore/firebase_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_visor_app/src/navegation/Text_box.dart';
 
-
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
 
@@ -28,35 +27,43 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.blueAccent,
       ),
       body: ListView(
+        padding: EdgeInsets.symmetric(horizontal: 20),
         children: [
           SizedBox(height: 50),
           // Foto de perfil
-          Icon(Icons.person, size: 72),
-
-          SizedBox(height: 10),
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: AssetImage('assets/profile_picture.png'),
+          ),
+          SizedBox(height: 20),
           // Email
-
+          Center(
+            child: Text(
+              'usuario@example.com',
+              style: TextStyle(fontSize: 18, color: Colors.grey[700]),
+            ),
+          ),
           SizedBox(height: 50),
           // Detalles
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
             child: Text(
               'Detalles',
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),
-
+          SizedBox(height: 20),
           // Usuario
           MyTextBox(
             text: 'Prueba',
             sectionName: 'Nombre Usuario',
             onPressed: () => editField('Nombre Usuario'),
           ),
+          SizedBox(height: 20),
           // Historial
           // Setting Notification
           // Elemento de perfil
-          SizedBox(height: 20),
-          itemProfile("Notificacion", Icons.add_alert_sharp, () {
+          itemProfile("Notificación", Icons.add_alert_sharp, () {
             // Navegar a la pantalla de ajustes
             Navigator.push(
               context,
@@ -70,20 +77,22 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget itemProfile(String title, IconData iconData, VoidCallback onPressed) {
     return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              offset: Offset(0, 3),
-              spreadRadius: 1,
-              blurRadius: 10,
-            )
-          ]
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            offset: Offset(0, 3),
+            spreadRadius: 1,
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: ListTile(
         title: Text(title),
-        leading: Icon(iconData),
+        leading: Icon(iconData, color: Colors.blueAccent),
         trailing: Icon(Icons.arrow_forward_ios_outlined),
         onTap: onPressed,
       ),
@@ -106,9 +115,10 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Configuración de Notificaciones"),
+        backgroundColor: Colors.blueAccent,
       ),
       body: ListView(
-        shrinkWrap: true,
+        padding: EdgeInsets.all(20),
         children: [
           SwitchItem(
             text: "Notificaciones Generales",
@@ -164,10 +174,25 @@ class SwitchItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(text),
-      leading: const Icon(Icons.notifications),
-      trailing: Switch(value: value, onChanged: onChanged),
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            offset: Offset(0, 3),
+            spreadRadius: 1,
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: ListTile(
+        title: Text(text),
+        leading: Icon(Icons.notifications, color: Colors.blueAccent),
+        trailing: Switch(value: value, onChanged: onChanged),
+      ),
     );
   }
 }
