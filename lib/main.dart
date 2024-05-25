@@ -1,27 +1,24 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/src/features/navegation/button_nav.dart';
-import 'package:geo_visor_app/src/navegation/login_page.dart';
+import 'package:geo_visor_app/src/features/Information/button_nav.dart';
+import 'package:geo_visor_app/src/features/profile/login_page.dart';
 import 'package:geo_visor_app/src/routing/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+int initialReportCount = 0;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('@mipmap/ic_launcher');
-  final InitializationSettings initializationSettings =
-  InitializationSettings(android: initializationSettingsAndroid);
+  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+  final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   runApp(const MyApp());
-  listenForReportChanges();
 }
 
 class MyApp extends StatelessWidget {
@@ -39,8 +36,8 @@ class MyApp extends StatelessWidget {
 class AuthenticationWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final bool isUserLoggedIn = false; // Cambia a tu lógica real de autenticación
-    return isUserLoggedIn ? const HomePage() : LoginPage();
+    final User? user = FirebaseAuth.instance.currentUser;
+    return user != null ? const HomePage() : LoginPage();
   }
 }
 
@@ -54,38 +51,84 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int index = 0;
   Bnavigator? myBnb;
+  String userName = 'Cargando...';
 
   @override
   void initState() {
+    super.initState();
     myBnb = Bnavigator(currentIndex: (i) {
       setState(() {
         index = i;
       });
     });
-    super.initState();
+
+    // Obtener el conteo inicial de reportes y luego escuchar los cambios
+    getInitialReportCount().then((count) {
+      setState(() {
+        initialReportCount = count;
+      });
+      listenForReportChanges();
+    });
+
+    // Obtener el nombre de usuario
+    fetchUserName();
+  }
+
+  Future<void> fetchUserName() async {
+    String? fetchedName = await getUserName();
+    setState(() {
+      userName = fetchedName ?? 'Usuario sin nombre';
+    });
+  }
+
+  Future<String?> getUserName() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Usuarios').doc(currentUser.uid).get();
+      if (userDoc.exists && userDoc.data() != null && userDoc['name'] != null) {
+        return userDoc['name'];
+      } else {
+        return null; // O un valor predeterminado, por ejemplo: 'Usuario sin nombre'
+      }
+    } else {
+      return null;
+    }
+  }
+
+  Future<int> getInitialReportCount() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('Reportes').get();
+    return snapshot.docs.length;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: myBnb,
-      body: Routes(index: index),
+      body: FutureBuilder<String?>(
+        future: getUserName(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            return Routes(index: index, userName: snapshot.data ?? "Usuario sin nombre");
+          }
+        },
+      ),
     );
   }
 }
 
 // Función para enviar notificación local
 void sendLocalNotification(String title, String body) async {
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
-  AndroidNotificationDetails(
+  const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
     'your_channel_id',
     'your_channel_name',
     channelDescription: 'your_channel_description',
     importance: Importance.max,
     priority: Priority.high,
   );
-  const NotificationDetails platformChannelSpecifics =
-  NotificationDetails(android: androidPlatformChannelSpecifics);
+  const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
   await flutterLocalNotificationsPlugin.show(
     0,
     title,
@@ -96,17 +139,16 @@ void sendLocalNotification(String title, String body) async {
 }
 
 // Función para escuchar cambios en la colección de reportes
-// Función para escuchar cambios en la colección de reportes
 void listenForReportChanges() {
   FirebaseFirestore.instance.collection('Reportes').snapshots().listen((snapshot) {
-    for (var change in snapshot.docChanges) {
-      if (change.type == DocumentChangeType.added) {
-        // Verificar si las notificaciones generales están habilitadas antes de enviar el mensaje
-        sendMessageIfNotificationsEnabled();
-      }
+    int currentReportCount = snapshot.docs.length;
+    if (currentReportCount > initialReportCount) {
+      initialReportCount = currentReportCount; // Actualizar el conteo inicial
+      sendMessageIfNotificationsEnabled();
     }
   });
 }
+
 // Función para enviar el mensaje si las notificaciones generales están habilitadas
 void sendMessageIfNotificationsEnabled() async {
   try {
@@ -134,5 +176,6 @@ void sendMessageIfNotificationsEnabled() async {
     print("Error al enviar el mensaje: $e");
   }
 }
+
 
 

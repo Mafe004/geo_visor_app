@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
-import '../features/navegation/form.dart';
+import '../features/Information/form.dart';
 
 class HomeMaps extends StatefulWidget {
   const HomeMaps({Key? key}) : super(key: key);

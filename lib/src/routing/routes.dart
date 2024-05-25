@@ -1,23 +1,24 @@
-
 import 'package:flutter/material.dart';
-import 'package:geo_visor_app/src/features/navegation/Profilepage.dart';
-import '../features/navegation/form.dart';
-import '../features/navegation/information.dart';
-import '../features/navegation/notipage.dart';
+
+import '../features/Information/form.dart';
+import '../features/Information/information.dart';
+import '../features/profile/Profilepage.dart';
 import '../navegation/home_screen.dart';
+import 'package:flutter/material.dart';
 
 class Routes extends StatelessWidget {
   final int index;
-  const Routes({Key?  key, required this.index});
+  final String userName;
+
+  const Routes({Key? key, required this.index, required this.userName}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // context.go('home');
-    List<Widget> mylist=[
+    List<Widget> mylist = [
       const InfoPage(),
       const HomeScreen(),
       const FormExampleApp(),
-      const ProfilePage(),
+      ProfilePage(userName: userName),
     ];
     return mylist[index];
   }

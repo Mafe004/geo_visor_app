@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_cloud_firestore/firebase_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../services/location_service.dart';
@@ -28,6 +29,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
 
   late TextEditingController ubicacion;
   final tipoLugar = TextEditingController();
+  final Descripcion = TextEditingController();
   final estadoCarretera = TextEditingController();
   final serviciosBasicos = TextEditingController();
   final estadoEdificaciones = TextEditingController();
@@ -69,32 +71,50 @@ class _FormExampleAppState extends State<FormExampleApp> {
 
   void saveDataToFirestore() async {
     if (currentPosition != null) {
-      final reportData = {
-        'ubicacion': currentAddress ?? '',
-        'tipoLugar': tipoLugar.text,
-        'estadoCarretera': estadoCarretera.text,
-        'serviciosBasicos': serviciosBasicos.text,
-        'estadoEdificaciones': estadoEdificaciones.text,
-        'calidadAgua': calidadAgua.text,
-        'fuentesAgua': fuentesAgua.text,
-        'problemasAgua': problemasAgua.text,
-        'tipoSuministros': tipoSuministros.text,
-        'estadoInstalaciones': estadoInstalaciones.text,
-        'cortesAgua': cortesAgua.text,
-        'tipoAlcantarillado': tipoAlcantarillado.text,
-        'estadoAlcantarillado': estadoAlcantarillado.text,
-        'problemasEspecificos': problemasEspecificos.text,
-        'comentarios': comentarios.text,
-        'timestamp': FieldValue.serverTimestamp(),
-        'images': selectedImages.map((image) => image.path).toList(),
-        'coordenadas': GeoPoint(
-            currentPosition!.latitude, currentPosition!.longitude),
-      };
-      try {
-        await _firestoreService.saveReport(reportData);
-        print('Data added successfully!');
-      } catch (error) {
-        print('Failed to add data: $error');
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          final userSnapshot = await FirebaseFirestore.instance.collection(
+              'Usuarios').doc(user.uid).get();
+          if (userSnapshot.exists) {
+            final userData = userSnapshot.data() as Map<String, dynamic>;
+            final userName = userData['name'] ??
+                'Usuario Desconocido'; // Obtener el nombre de usuario o establecer uno predeterminado
+            final reportData = {
+              'userId': user.uid,
+              'userName': userName,
+              // Guardar el nombre del usuario en el informe
+              'ubicacion': currentAddress ?? '',
+              'Descripcion': Descripcion.text,
+              'tipoLugar': tipoLugar.text,
+              'estadoCarretera': estadoCarretera.text,
+              'serviciosBasicos': serviciosBasicos.text,
+              'estadoEdificaciones': estadoEdificaciones.text,
+              'calidadAgua': calidadAgua.text,
+              'fuentesAgua': fuentesAgua.text,
+              'problemasAgua': problemasAgua.text,
+              'tipoSuministros': tipoSuministros.text,
+              'estadoInstalaciones': estadoInstalaciones.text,
+              'cortesAgua': cortesAgua.text,
+              'tipoAlcantarillado': tipoAlcantarillado.text,
+              'estadoAlcantarillado': estadoAlcantarillado.text,
+              'problemasEspecificos': problemasEspecificos.text,
+              'comentarios': comentarios.text,
+              'timestamp': FieldValue.serverTimestamp(),
+              'images': selectedImages.map((image) => image.path).toList(),
+              'coordenadas': GeoPoint(
+                  currentPosition!.latitude, currentPosition!.longitude),
+            };
+            await _firestoreService.saveReport(reportData);
+            print('Data added successfully!');
+          } else {
+            print('User data not found in Firestore.');
+          }
+        } catch (error) {
+          print('Failed to fetch user data: $error');
+        }
+      } else {
+        print('No user currently signed in.');
       }
     } else {
       print('Current position is null. Cannot save data.');
@@ -244,6 +264,16 @@ class _FormExampleAppState extends State<FormExampleApp> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'El tipo de lugar es obligatorio';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: Descripcion,
+                  decoration: const InputDecoration(labelText: 'Descripcion general'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Descripcion de lugar es obligatorio';
                     }
                     return null;
                   },
