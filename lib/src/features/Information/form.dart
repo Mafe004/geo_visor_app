@@ -241,18 +241,11 @@ class _FormExampleAppState extends State<FormExampleApp> {
         validImages.add(image);
       }
     }
-
     // Si las imágenes cumplen con los requisitos, agregarlas a la lista de imágenes seleccionadas.
     selectedImages.addAll(validImages);
-
     // Mostrar el tamaño y la resolución de las imágenes
-
-
     setState(() {});
   }
-
-
-
 
   List<Step> steps() =>
       [

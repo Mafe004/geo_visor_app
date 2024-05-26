@@ -1,3 +1,4 @@
+import 'package:firebase_cloud_firestore/firebase_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -21,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _getCurrentLocation();
+    _getMarkersFromFirebase(); // Obtener marcadores de Firebase
   }
 
   void _getCurrentLocation() async {
@@ -35,8 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<String> _getAddressFromLatLng(Position position) async {
-    final coordinates = LatLng(position.latitude, position.longitude); // Usa LatLng
-    final List<Placemark> placemarks = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude); // Usa placemarkFromCoordinates
+    final coordinates = LatLng(position.latitude, position.longitude);
+    final List<Placemark> placemarks = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude);
     final Placemark place = placemarks[0];
     return "${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}";
   }
@@ -45,8 +47,30 @@ class _HomeScreenState extends State<HomeScreen> {
     mapController = controller;
   }
 
-  // Navegar al perfil
+  Future<void> _getMarkersFromFirebase() async {
+    // Acceder a la colección "Reportes" en Firestore
+    QuerySnapshot reportes = await FirebaseFirestore.instance.collection('Reportes').get();
 
+    // Iterar sobre los documentos en la colección
+    reportes.docs.forEach((doc) {
+      // Obtener las coordenadas del documento
+      GeoPoint? geoPoint = doc['coordenadas'];
+
+      // Si las coordenadas existen, crea un marcador
+      if (geoPoint != null) {
+        Marker marker = Marker(
+          markerId: MarkerId(doc.id),
+          position: LatLng(geoPoint.latitude, geoPoint.longitude),
+          infoWindow: InfoWindow(title: 'Reporte', snippet: 'Descripción del reporte'),
+        );
+
+        // Agregar el marcador al conjunto de marcadores
+        setState(() {
+          markers[MarkerId(doc.id)] = marker;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.indigoAccent,
         centerTitle: true,
       ),
-
       body: _currentPosition != null
           ? Stack(
         children: [
@@ -75,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
+            markers: Set<Marker>.of(markers.values), // Mostrar los marcadores en el mapa
           ),
           Positioned(
             top: 16,
@@ -122,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
         onPressed: () {
-
+          // Acción para realizar al presionar el botón flotante
         },
         child: const Icon(Icons.add),
       ),

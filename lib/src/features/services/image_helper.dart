@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:image/image.dart' as img;
 
@@ -8,4 +7,3 @@ class ImageHelper {
     return '${image!.width}x${image.height}';
   }
 }
-
