@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_cloud_firestore/firebase_cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'dart:io';
+import '../services/image_helper.dart';
 import '../services/location_service.dart';
 import '../services/image_service.dart';
 import '../services/firestore_service.dart';
-import 'dart:io';
-import 'package:geolocator/geolocator.dart';
+
 
 class FormExampleApp extends StatefulWidget {
   final String? initialAddress;
@@ -179,6 +181,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
     );
   }
 
+
   void _addImages(List<File> newImages) {
     final totalImages = selectedImages.length + newImages.length;
 
@@ -204,17 +207,24 @@ class _FormExampleAppState extends State<FormExampleApp> {
       return;
     }
 
-    // Verificar el tamaño de cada imagen antes de agregarla a la lista de imágenes seleccionadas.
+    // Lista para almacenar imágenes válidas (resolución <= 1024x1024)
+    List<File> validImages = [];
+
+    // Verificar el tamaño y la resolución de cada imagen antes de agregarla a la lista de imágenes seleccionadas.
     for (final image in newImages) {
-      final imageSize = image.lengthSync() / (1024 * 1024); // Tamaño en MB
-      if (imageSize > 5) {
-        // Si el tamaño de la imagen excede 5 MB, mostrar un mensaje de error.
+      final resolution = ImageHelper.getImageResolution(image);
+      final width = int.parse(resolution.split('x')[0]);
+      final height = int.parse(resolution.split('x')[1]);
+
+      if (width > 800 || height > 800) {
+        // Si la resolución de la imagen es mayor que 1024x1024, mostrar un mensaje de error.
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Error'),
-              content: Text('La imagen seleccionada excede el tamaño máximo permitido de 5 MB.'),
+              content: Text(
+                  'La imagen seleccionada tiene una resolución mayor que 1024x1024 y no puede ser agregada.'),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -226,14 +236,23 @@ class _FormExampleAppState extends State<FormExampleApp> {
             );
           },
         );
-        return;
+      } else {
+        // Si la imagen es válida (resolución <= 1024x1024), agregarla a la lista de imágenes válidas.
+        validImages.add(image);
       }
     }
 
     // Si las imágenes cumplen con los requisitos, agregarlas a la lista de imágenes seleccionadas.
-    selectedImages.addAll(newImages);
+    selectedImages.addAll(validImages);
+
+    // Mostrar el tamaño y la resolución de las imágenes
+
+
     setState(() {});
   }
+
+
+
 
   List<Step> steps() =>
       [
@@ -290,8 +309,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
             children: [
               TextFormField(
                 controller: estadoCarretera,
-                decoration: const InputDecoration(
-                    labelText: 'Estado de las carreteras o calles de acceso'),
+                decoration: const InputDecoration(labelText: 'Estado de las carreteras o calles de acceso'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'El estado de las carreteras es obligatorio';
@@ -301,8 +319,7 @@ class _FormExampleAppState extends State<FormExampleApp> {
               ),
               TextFormField(
                 controller: serviciosBasicos,
-                decoration: const InputDecoration(
-                    labelText: 'Disponibilidad de servicios básicos'),
+                decoration: const InputDecoration(labelText: 'Disponibilidad de servicios básicos'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'La disponibilidad de servicios básicos es obligatoria';
