@@ -12,321 +12,385 @@ class EntidadRegister extends StatefulWidget {
   @override
   _EntidadRegisterState createState() => _EntidadRegisterState();
 }
+
 class _EntidadRegisterState extends State<EntidadRegister> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _formKey = GlobalKey<FormState>(); // Clave global para validar el formulario
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordC = TextEditingController();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _docNumberController = TextEditingController();
+  final _nitController = TextEditingController();
 
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _docNumberController = TextEditingController();
-  final TextEditingController _nitController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  String? _selectedDocumentType;
+  List<String> documentTypes = ['CC', 'TI', 'CE', 'PP'];
 
-  String _selectedDocumentType = 'CC';
-  bool _isLoading = false;
+  Future<void> _register() async {
+    if (_formKey.currentState!.validate()) {
+      // Validar el formulario
+      try {
+        if (_passwordController.text != _confirmPasswordC.text) {
+          throw 'Las contraseñas no coinciden.';
+        }
+
+        final UserCredential userCredential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+
+        final User? user = userCredential.user;
+
+        if (user != null) {
+          // Intenta guardar los datos del usuario en Firestore
+          await FirebaseFirestore.instance.collection('DatosEntidad').doc(userCredential.user!.uid).set({
+            'nombre': _nameController.text,
+            'telefono': _phoneController.text,
+            'tipoDocumento': _selectedDocumentType,
+            'numeroDocumento': _docNumberController.text,
+            'nit': _nitController.text,
+            'correo': _emailController.text,
+          });
+
+          // Si el registro es exitoso, muestra una notificación y navega a la página de inicio de sesión
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Registro exitoso'),
+            ),
+          );
+          // Navega a la página de inicio de sesión
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
+        } else {
+          // Si no se pudo obtener el usuario, muestra un mensaje de error
+          throw 'Error: No se pudo obtener el usuario.';
+        }
+      } catch (e) {
+        // Manejar errores de registro
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error en el registro: $e'),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blueAccent,
-      appBar: AppBar(
-        title: Text('Registro de Entidad'),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: SingleChildScrollView(
+      body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Nombre',
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(10.0),
+          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey, // Usar la clave global para validar el formulario
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.water,
+                    size: 100,
                   ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa el nombre de la entidad.';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20.0),
-              TextFormField(
-                controller: _phoneController,
-                decoration: InputDecoration(
-                  labelText: 'Teléfono',
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 50),
+                  const Text(
+                    "Crear Cuenta",
+                    style: TextStyle(fontSize: 20),
                   ),
-                ),
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa el número de teléfono de la entidad.';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20.0),
-              DropdownButtonFormField<String>(
-                value: _selectedDocumentType,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedDocumentType = newValue!;
-                  });
-                },
-                items: ['CC', 'CE', 'PP'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                decoration: InputDecoration(
-                  labelText: 'Tipo de Documento',
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 25),
+                  TextFormField(
+                    controller: _nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, ingresa tu nombre.';
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Nombre',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(height: 20.0),
-              TextFormField(
-                controller: _docNumberController,
-                decoration: InputDecoration(
-                  labelText: 'Número de Documento',
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _phoneController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, ingresa tu número de teléfono.';
+                      } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                        return 'El número de teléfono solo puede contener números.';
+                      }
+                      return null;
+                    },
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Teléfono',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                    ),
                   ),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa el número de documento de la entidad.';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20.0),
-              TextFormField(
-                controller: _nitController,
-                decoration: InputDecoration(
-                  labelText: 'NIT de la Entidad',
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _nitController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, ingresa tu número de nit.';
+                      } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                        return 'El número de nit solo puede contener números.';
+                      }
+                      return null;
+                    },
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'NIT',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                    ),
                   ),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa el NIT de la entidad.';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20.0),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Correo de la Entidad',
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    value: _selectedDocumentType,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, selecciona tu tipo de documento.';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedDocumentType = value;
+                      });
+                    },
+                    items: documentTypes.map((type) {
+                      return DropdownMenuItem<String>(
+                        value: type,
+                        child: Text(type),
+                      );
+                    }).toList(),
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Tipo de documento',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                    ),
                   ),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa el correo de la entidad.';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20.0),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _docNumberController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, ingresa tu número de documento.';
+                      } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                        return 'El número de documento solo puede contener números.';
+                      }
+                      return null;
+                    },
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Número de documento',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                    ),
                   ),
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa la contraseña.';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20.0),
-              TextFormField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Confirmar Contraseña',
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, ingresa tu correo electrónico.';
+                      } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                        return 'Por favor, ingresa un correo electrónico válido.';
+                      }
+                      return null;
+                    },
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Correo electrónico',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide
+                          (color: Colors.white),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                    ),
                   ),
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, confirma la contraseña.';
-                  } else if (value != _passwordController.text) {
-                    return 'Las contraseñas no coinciden.';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20.0),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _register,
-                child: _isLoading ? CircularProgressIndicator() : Text('Registrarse'),
-              ),
-              SizedBox(height: 20.0),
-              InkWell(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()),
-                  );
-                },
-                child: Text(
-                  '¿Eres usuario?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    decoration: TextDecoration.underline,
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _passwordController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, ingresa tu contraseña.';
+                      } else if (value.length < 6) {
+                        return 'La contraseña debe tener al menos 6 caracteres.';
+                      }
+                      return null;
+                    },
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Contraseña',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(height: 10.0),
-              InkWell(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  );
-                },
-                child: Text(
-                  '¿Estás Registrado?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    decoration: TextDecoration.underline,
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _confirmPasswordC,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, confirma tu contraseña.';
+                      } else if (value != _passwordController.text) {
+                        return 'Las contraseñas no coinciden.';
+                      }
+                      return null;
+                    },
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Confirmar contraseña',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green),
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 15),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _register,
+                      child: const Text('Registrar'),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => RegisterPage()),
+                          );
+                        },
+                        child: Text(
+                          '¿Eres usuario?',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => LoginPage()),
+                          );
+                        },
+                        child: Text(
+                          '¿Estás Registrado?',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
-
-  void _register() async {
-    // Validar el formulario antes de registrar al usuario
-    if (!_validateForm()) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // Crear el usuario en Firebase Authentication
-      final UserCredential userCredential =
-      await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-
-      // Guardar los datos de la entidad en Cloud Firestore
-      await _firestore.collection('DatosEntidad').doc(userCredential.user!.uid).set({
-        'nombre': _nameController.text,
-        'telefono': _phoneController.text,
-        'tipoDocumento': _selectedDocumentType,
-        'numeroDocumento': _docNumberController.text,
-        'nit': _nitController.text,
-        'correo': _emailController.text,
-      });
-
-      // Mostrar mensaje de éxito
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Registro exitoso.'),
-      ));
-
-      // Redirigir al usuario a la página de inicio de sesión
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
-    } catch (error) {
-      print('Error en el registro: $error');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error en el registro. Por favor, inténtelo de nuevo.'),
-      ));
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  bool _validateForm() {
-    if (_nameController.text.isEmpty ||
-        _phoneController.text.isEmpty ||
-        _docNumberController.text.isEmpty ||
-        _nitController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty) {
-      // Mostrar mensaje de error si algún campo está vacío
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Por favor complete todos los campos.'),
-      ));
-      return false;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      // Mostrar mensaje de error si las contraseñas no coinciden
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Las contraseñas no coinciden.'),
-      ));
-      return false;
-    }
-
-    return true;
-  }
-
 }
-
-

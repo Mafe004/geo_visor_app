@@ -18,12 +18,36 @@ class _HomeScreenState extends State<HomeScreen> {
   Position? _currentPosition;
   String? _currentAddress;
 
-  @override
   void initState() {
     super.initState();
     _getCurrentLocation();
-    _getMarkersFromFirebase(); // Obtener marcadores de Firebase
+    _getMarkersFromFirebase(); // Nuevo método para obtener marcadores de Firebase
   }
+
+  void _getMarkersFromFirebase() async {
+    // Recuperar la colección "reporte" de Firebase
+    QuerySnapshot reportes = await FirebaseFirestore.instance.collection('reporte').get();
+
+    // Iterar sobre los documentos en la colección
+    reportes.docs.forEach((doc) {
+      // Obtener las coordenadas del documento
+      List<dynamic> coordenadas = doc['coordenadas'];
+
+      // Crear un nuevo marcador con las coordenadas del documento
+      Marker marker = Marker(
+        markerId: MarkerId(doc.id),
+        position: LatLng(coordenadas[0], coordenadas[1]),
+        infoWindow: InfoWindow(title: 'Reporte', snippet: 'Descripción del reporte'),
+      );
+
+
+      // Agregar el marcador al conjunto de marcadores
+      setState(() {
+        markers[MarkerId(doc.id)] = marker;
+      });
+    });
+  }
+
 
   void _getCurrentLocation() async {
     final position = await Geolocator.getCurrentPosition(
@@ -37,8 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<String> _getAddressFromLatLng(Position position) async {
-    final coordinates = LatLng(position.latitude, position.longitude);
-    final List<Placemark> placemarks = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude);
+    final coordinates = LatLng(position.latitude, position.longitude); // Usa LatLng
+    final List<Placemark> placemarks = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude); // Usa placemarkFromCoordinates
     final Placemark place = placemarks[0];
     return "${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}";
   }
@@ -47,30 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
     mapController = controller;
   }
 
-  Future<void> _getMarkersFromFirebase() async {
-    // Acceder a la colección "Reportes" en Firestore
-    QuerySnapshot reportes = await FirebaseFirestore.instance.collection('Reportes').get();
+  // Navegar al perfil
 
-    // Iterar sobre los documentos en la colección
-    reportes.docs.forEach((doc) {
-      // Obtener las coordenadas del documento
-      GeoPoint? geoPoint = doc['coordenadas'];
-
-      // Si las coordenadas existen, crea un marcador
-      if (geoPoint != null) {
-        Marker marker = Marker(
-          markerId: MarkerId(doc.id),
-          position: LatLng(geoPoint.latitude, geoPoint.longitude),
-          infoWindow: InfoWindow(title: 'Reporte', snippet: 'Descripción del reporte'),
-        );
-
-        // Agregar el marcador al conjunto de marcadores
-        setState(() {
-          markers[MarkerId(doc.id)] = marker;
-        });
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.indigoAccent,
         centerTitle: true,
       ),
+
       body: _currentPosition != null
           ? Stack(
         children: [
@@ -98,7 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
-            markers: Set<Marker>.of(markers.values), // Mostrar los marcadores en el mapa
           ),
           Positioned(
             top: 16,
@@ -146,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
         onPressed: () {
-          // Acción para realizar al presionar el botón flotante
+
         },
         child: const Icon(Icons.add),
       ),

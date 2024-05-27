@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geo_visor_app/src/features/profile/register_page.dart';
-
 import '../../../main.dart'; // Importa Firestore
 
 class LoginPage extends StatefulWidget {
@@ -31,17 +30,39 @@ class _LoginPageState extends State<LoginPage> {
         final User? user = userCredential.user;
 
         if (user != null) {
-          // Guarda el token en la información del usuario en Firestore
-          final String? token = await FirebaseMessaging.instance.getToken();
-          await FirebaseFirestore.instance.collection('Usuarios').doc(user.uid).update({
-            'notificationToken': token,
-          });
-
-          // Navega al HomeScreen después de iniciar sesión
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()), // Cambiar a HomePage
-          );
+          // Verifica si el usuario está en la colección de Entidades
+          final entityDoc = await FirebaseFirestore.instance.collection('DatosEntidad').doc(user.uid).get();
+          if (entityDoc.exists) {
+            // Es una entidad, guarda el token en la información de la entidad
+            final String? token = await FirebaseMessaging.instance.getToken();
+            await FirebaseFirestore.instance.collection('DatosEntidad').doc(user.uid).update({
+              'notificationToken': token,
+            });
+            // Navega a la página específica de entidades
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()), // Cambiar a la página de entidad
+            );
+          } else {
+            // Verifica si el usuario está en la colección de Usuarios
+            final userDoc = await FirebaseFirestore.instance.collection('Usuarios').doc(user.uid).get();
+            if (userDoc.exists) {
+              // Es un usuario normal, guarda el token en la información del usuario
+              final String? token = await FirebaseMessaging.instance.getToken();
+              await FirebaseFirestore.instance.collection('Usuarios').doc(user.uid).update({
+                'notificationToken': token,
+              });
+              // Navega a la página específica de usuarios
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()), // Cambiar a HomePage
+              );
+            } else {
+              setState(() {
+                _errorText = 'No se encontró el tipo de usuario.';
+              });
+            }
+          }
         }
       } catch (e) {
         setState(() {
@@ -118,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Text(
                       _errorText!,
-                      style: TextStyle(color: Colors.red),
+                      style: const TextStyle(color: Colors.red),
                     ),
                   ),
                 const SizedBox(height: 10),
@@ -175,3 +196,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
