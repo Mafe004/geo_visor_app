@@ -33,6 +33,19 @@ class _SettingsPageState extends State<SettingsPage> {
           });
         }
       }
+      if (user != null) {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('DatosEntidad')
+            .doc(user.uid)
+            .get();
+        final data = snapshot.data();
+        if (data != null) {
+          setState(() {
+            generalNotificationsEnabled = data['notificaciones_generales'] ?? false;
+            entityNotificationsEnabled = data['notificaciones_entidades'] ?? false;
+          });
+        }
+      }
     } catch (e) {
       print("Error loading notification settings: $e");
     }
@@ -79,6 +92,12 @@ class _SettingsPageState extends State<SettingsPage> {
       if (user != null) {
         await FirebaseFirestore.instance
             .collection('Usuarios')
+            .doc(user.uid)
+            .update({field: value});
+      }
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('DatosEntidad')
             .doc(user.uid)
             .update({field: value});
       }
