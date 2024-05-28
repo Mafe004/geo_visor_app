@@ -1,4 +1,3 @@
-import 'package:firebase_cloud_firestore/firebase_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,36 +17,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Position? _currentPosition;
   String? _currentAddress;
 
+  @override
   void initState() {
     super.initState();
     _getCurrentLocation();
-    _getMarkersFromFirebase(); // Nuevo método para obtener marcadores de Firebase
   }
-
-  void _getMarkersFromFirebase() async {
-    // Recuperar la colección "reporte" de Firebase
-    QuerySnapshot reportes = await FirebaseFirestore.instance.collection('reporte').get();
-
-    // Iterar sobre los documentos en la colección
-    reportes.docs.forEach((doc) {
-      // Obtener las coordenadas del documento
-      List<dynamic> coordenadas = doc['coordenadas'];
-
-      // Crear un nuevo marcador con las coordenadas del documento
-      Marker marker = Marker(
-        markerId: MarkerId(doc.id),
-        position: LatLng(coordenadas[0], coordenadas[1]),
-        infoWindow: InfoWindow(title: 'Reporte', snippet: 'Descripción del reporte'),
-      );
-
-
-      // Agregar el marcador al conjunto de marcadores
-      setState(() {
-        markers[MarkerId(doc.id)] = marker;
-      });
-    });
-  }
-
 
   void _getCurrentLocation() async {
     final position = await Geolocator.getCurrentPosition(
