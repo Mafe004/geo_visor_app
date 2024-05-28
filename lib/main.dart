@@ -94,6 +94,17 @@ class _HomePageState extends State<HomePage> {
     } else {
       return null;
     }
+    if (currentUser != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('DatosEntidad').doc(currentUser.uid).get();
+      if (userDoc.exists && userDoc.data() != null && userDoc['nombre'] != null) {
+        return userDoc['name'];
+      } else {
+        return null; // O un valor predeterminado, por ejemplo: 'Usuario sin nombre'
+      }
+    } else {
+      return null;
+    }
+
   }
 
   Future<int> getInitialReportCount() async {

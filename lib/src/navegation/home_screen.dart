@@ -1,9 +1,8 @@
-import 'package:firebase_cloud_firestore/firebase_cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart'; // Importa el plugin de geocoding
-
+import 'package:geocoding/geocoding.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -18,36 +17,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Position? _currentPosition;
   String? _currentAddress;
 
+  @override
   void initState() {
     super.initState();
     _getCurrentLocation();
-    _getMarkersFromFirebase(); // Nuevo método para obtener marcadores de Firebase
+    _getMarkersFromFirebase(); // Obtener marcadores de Firebase
   }
-
-  void _getMarkersFromFirebase() async {
-    // Recuperar la colección "reporte" de Firebase
-    QuerySnapshot reportes = await FirebaseFirestore.instance.collection('reporte').get();
-
-    // Iterar sobre los documentos en la colección
-    reportes.docs.forEach((doc) {
-      // Obtener las coordenadas del documento
-      List<dynamic> coordenadas = doc['coordenadas'];
-
-      // Crear un nuevo marcador con las coordenadas del documento
-      Marker marker = Marker(
-        markerId: MarkerId(doc.id),
-        position: LatLng(coordenadas[0], coordenadas[1]),
-        infoWindow: InfoWindow(title: 'Reporte', snippet: 'Descripción del reporte'),
-      );
-
-
-      // Agregar el marcador al conjunto de marcadores
-      setState(() {
-        markers[MarkerId(doc.id)] = marker;
-      });
-    });
-  }
-
 
   void _getCurrentLocation() async {
     final position = await Geolocator.getCurrentPosition(
@@ -61,8 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<String> _getAddressFromLatLng(Position position) async {
-    final coordinates = LatLng(position.latitude, position.longitude); // Usa LatLng
-    final List<Placemark> placemarks = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude); // Usa placemarkFromCoordinates
+    final coordinates = LatLng(position.latitude, position.longitude);
+    final List<Placemark> placemarks = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude);
     final Placemark place = placemarks[0];
     return "${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}";
   }
@@ -71,8 +46,68 @@ class _HomeScreenState extends State<HomeScreen> {
     mapController = controller;
   }
 
-  // Navegar al perfil
+  Future<double> _getMarkerColor(String userId) async {
+    final userDoc = await FirebaseFirestore.instance.collection('Usuarios').doc(userId).get();
+    if (userDoc.exists) {
+      return BitmapDescriptor.hueBlue;
+    }
+    final entityDoc = await FirebaseFirestore.instance.collection('DatosEntidad').doc(userId).get();
+    if (entityDoc.exists) {
+      return BitmapDescriptor.hueGreen;
+    }
+    return BitmapDescriptor.hueRed; // Default color if userId not found in either collection
+  }
 
+  Future<void> _getMarkersFromFirebase() async {
+    QuerySnapshot reportes = await FirebaseFirestore.instance.collection('Reportes').get();
+
+    for (var doc in reportes.docs) {
+      GeoPoint? geoPoint = doc['coordenadas'];
+      String userId = doc['userId'];
+
+      if (geoPoint != null) {
+        final markerColor = await _getMarkerColor(userId);
+        Marker marker = Marker(
+          markerId: MarkerId(doc.id),
+          position: LatLng(geoPoint.latitude, geoPoint.longitude),
+          icon: BitmapDescriptor.defaultMarkerWithHue(markerColor),
+          onTap: () {
+            _showMarkerDetails(doc);
+          },
+        );
+
+        setState(() {
+          markers[MarkerId(doc.id)] = marker;
+        });
+      }
+    }
+  }
+
+  void _showMarkerDetails(DocumentSnapshot doc) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Detalles del Reporte',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text('Ubicación: ${doc['ubicacion']}'),
+              Text('Descripción: ${doc['Descripcion']}'),
+              Text('Usuario: ${doc['userId']}'),
+              // Puedes agregar más detalles aquí
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +124,6 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.indigoAccent,
         centerTitle: true,
       ),
-
       body: _currentPosition != null
           ? Stack(
         children: [
@@ -101,6 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
+            markers: Set<Marker>.of(markers.values), // Mostrar los marcadores en el mapa
           ),
           Positioned(
             top: 16,
@@ -114,27 +149,46 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Latitud: ${_currentPosition!.latitude.toStringAsFixed(6)}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Longitud: ${_currentPosition!.longitude.toStringAsFixed(6)}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Entidad',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 4),
-                  Text(
-                    'Dirección: $_currentAddress',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Usuario',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -148,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
         onPressed: () {
-
+          // Acción para realizar al presionar el botón flotante
         },
         child: const Icon(Icons.add),
       ),
