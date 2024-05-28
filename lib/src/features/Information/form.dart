@@ -118,7 +118,55 @@ class _FormExampleAppState extends State<FormExampleApp> {
       } else {
         print('No user currently signed in.');
       }
-    } else {
+    }
+    if (currentPosition != null) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          final userSnapshot = await FirebaseFirestore.instance.collection(
+              'DatosEntidad').doc(user.uid).get();
+          if (userSnapshot.exists) {
+            final userData = userSnapshot.data() as Map<String, dynamic>;
+            final userName = userData['nombre'] ??
+                'Usuario Desconocido'; // Obtener el nombre de usuario o establecer uno predeterminado
+            final reportData = {
+              'userId': user.uid,
+              'userName': userName,
+              // Guardar el nombre del usuario en el informe
+              'ubicacion': currentAddress ?? '',
+              'Descripcion': Descripcion.text,
+              'tipoLugar': tipoLugar.text,
+              'estadoCarretera': estadoCarretera.text,
+              'serviciosBasicos': serviciosBasicos.text,
+              'estadoEdificaciones': estadoEdificaciones.text,
+              'calidadAgua': calidadAgua.text,
+              'fuentesAgua': fuentesAgua.text,
+              'problemasAgua': problemasAgua.text,
+              'tipoSuministros': tipoSuministros.text,
+              'estadoInstalaciones': estadoInstalaciones.text,
+              'cortesAgua': cortesAgua.text,
+              'tipoAlcantarillado': tipoAlcantarillado.text,
+              'estadoAlcantarillado': estadoAlcantarillado.text,
+              'problemasEspecificos': problemasEspecificos.text,
+              'comentarios': comentarios.text,
+              'timestamp': FieldValue.serverTimestamp(),
+              'images': selectedImages.map((image) => image.path).toList(),
+              'coordenadas': GeoPoint(
+                  currentPosition!.latitude, currentPosition!.longitude),
+            };
+            await _firestoreService.saveReport(reportData);
+            print('Data added successfully!');
+          } else {
+            print('User data not found in Firestore.');
+          }
+        } catch (error) {
+          print('Failed to fetch user data: $error');
+        }
+      } else {
+        print('No user currently signed in.');
+      }
+    }
+    else {
       print('Current position is null. Cannot save data.');
     }
   }
